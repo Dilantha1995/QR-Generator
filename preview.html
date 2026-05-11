@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProSynergy Contact Card QR</title>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<style>
+
+body{
+    font-family:Arial,sans-serif;
+    background:#f2f2f2;
+    padding:20px;
+    margin:0;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+    display:grid;
+    grid-template-columns:350px 1fr;
+    gap:20px;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-bottom:15px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    box-sizing:border-box;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:black;
+    color:white;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.label{
+    width:320px;
+    height:180px;
+    border:1px dashed #999;
+    border-radius:10px;
+    background:white;
+    position:relative;
+    padding:10px;
+    overflow:hidden;
+    box-sizing:border-box;
+}
+
+.company{
+    text-align:center;
+    font-size:10px;
+    color:#666;
+}
+
+.item-name{
+    text-align:center;
+    font-size:14px;
+    font-weight:bold;
+    margin-top:5px;
+}
+
+.barcode-area{
+    width:190px;
+    margin-top:10px;
+    text-align:center;
+}
+
+.qr-area{
+    position:absolute;
+    right:10px;
+    bottom:10px;
+}
+
+.preview{
+    margin-top:20px;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    white-space:pre-line;
+    line-height:1.8;
+}
+
+.note{
+    color:green;
+    font-size:13px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<h2>ProSynergy Contact QR Tool</h2>
+
+<label>Item Name</label>
+<input type="text" id="itemName" value="Double A A4 Paper 80 GSM">
+
+<label>Item Code</label>
+<input type="text" id="itemCode" value="10025">
+
+<label>Barcode Number</label>
+<input type="text" id="barcodeText" value="8851907100012">
+
+<button onclick="generateLabel()">Generate Label</button>
+
+<button onclick="downloadPNG()">Download PNG</button>
+
+<p class="note">
+QR scans as a contact card and shows only Item Name & Item Code.
+</p>
+
+</div>
+
+<div class="card">
+
+<h2>Label Preview</h2>
+
+<div class="label" id="labelCapture">
+
+<div class="company">
+ProSynergy Medical System Pvt Ltd
+</div>
+
+<div class="item-name" id="displayName"></div>
+
+<div class="barcode-area">
+<svg id="barcode"></svg>
+<div id="displayBarcode" style="font-size:11px;"></div>
+</div>
+
+<div class="qr-area">
+<canvas id="qrcode"></canvas>
+</div>
+
+</div>
+
+<div class="preview" id="previewText"></div>
+
+</div>
+
+</div>
+
+<script>
+
+function generateLabel(){
+
+let itemName = document.getElementById("itemName").value;
+let itemCode = document.getElementById("itemCode").value;
+let barcodeText = document.getElementById("barcodeText").value;
+
+document.getElementById("displayName").innerText = itemName;
+document.getElementById("displayBarcode").innerText = barcodeText;
+
+/* BARCODE */
+
+JsBarcode("#barcode", barcodeText,{
+    format:"CODE128",
+    width:1.4,
+    height:40,
+    displayValue:false,
+    margin:0
+});
+
+/* VCARD CONTACT FORMAT */
+
+let vCard =
+"BEGIN:VCARD\r\n" +
+"VERSION:3.0\r\n" +
+"N:" + itemName + ";;;;\r\n" +
+"FN:" + itemName + "\r\n" +
+"ORG:ProSynergy Medical System Pvt Ltd\r\n" +
+"NOTE:Item Code : " + itemCode + "\r\n" +
+"END:VCARD";
+
+/* PREVIEW */
+
+document.getElementById("previewText").innerText =
+"Item Name : " + itemName + "\n" +
+"Item Code : " + itemCode;
+
+/* QR */
+
+let canvas = document.getElementById("qrcode");
+let ctx = canvas.getContext("2d");
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+QRCode.toCanvas(canvas, vCard,{
+    width:85,
+    margin:1,
+    errorCorrectionLevel:"L"
+});
+
+}
+
+/* DOWNLOAD PNG */
+
+function downloadPNG(){
+
+html2canvas(document.querySelector("#labelCapture"),{
+    backgroundColor:"#ffffff",
+    scale:3
+}).then(canvas=>{
+
+    let link=document.createElement("a");
+    link.download="prosynergy-contact-card.png";
+    link.href=canvas.toDataURL();
+    link.click();
+
+});
+
+}
+
+generateLabel();
+
+</script>
+
+</body>
+</html>
