@@ -1,239 +1,298 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ProSynergy Contact Card QR</title>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'>
+<title>ProSynergy Label Tool</title>
+
+<script src='https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js'></script>
 
 <style>
 
 body{
-    font-family:Arial,sans-serif;
-    background:#f2f2f2;
-    padding:20px;
-    margin:0;
+font-family:Arial;
+background:#f2f2f2;
+padding:20px;
+margin:0;
 }
 
-.container{
-    max-width:1100px;
-    margin:auto;
-    display:grid;
-    grid-template-columns:350px 1fr;
-    gap:20px;
+h1{
+text-align:center;
 }
 
-.card{
-    background:white;
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+.top{
+background:white;
+padding:20px;
+border-radius:12px;
+margin-bottom:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+th,td{
+border:1px solid #ccc;
+padding:8px;
+text-align:left;
 }
 
 input{
-    width:100%;
-    padding:12px;
-    margin-bottom:15px;
-    border:1px solid #ccc;
-    border-radius:8px;
-    box-sizing:border-box;
+width:100%;
+padding:8px;
+box-sizing:border-box;
+border:1px solid #ccc;
+border-radius:5px;
 }
 
 button{
-    width:100%;
-    padding:12px;
-    border:none;
-    border-radius:8px;
-    background:black;
-    color:white;
-    cursor:pointer;
-    margin-top:10px;
+padding:12px 20px;
+background:black;
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
+margin-top:15px;
+margin-right:10px;
+}
+
+.sheet{
+width:210mm;
+min-height:297mm;
+background:white;
+margin:auto;
+padding:8mm;
+box-sizing:border-box;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:6mm;
 }
 
 .label{
-    width:320px;
-    height:180px;
-    border:1px dashed #999;
-    border-radius:10px;
-    background:white;
-    position:relative;
-    padding:10px;
-    overflow:hidden;
-    box-sizing:border-box;
+width:60mm;
+height:35mm;
+border:1px dashed #999;
+border-radius:3mm;
+position:relative;
+padding:2mm;
+overflow:hidden;
+box-sizing:border-box;
 }
 
 .company{
-    text-align:center;
-    font-size:10px;
-    color:#666;
+font-size:7px;
+text-align:center;
+color:#666;
 }
 
-.item-name{
-    text-align:center;
-    font-size:14px;
-    font-weight:bold;
-    margin-top:5px;
+.item{
+font-size:10px;
+font-weight:bold;
+text-align:center;
+height:10mm;
+overflow:hidden;
 }
 
-.barcode-area{
-    width:190px;
-    margin-top:10px;
-    text-align:center;
+.barcodeArea{
+width:36mm;
+text-align:center;
 }
 
-.qr-area{
-    position:absolute;
-    right:10px;
-    bottom:10px;
+.barcodeNo{
+font-size:7px;
 }
 
-.preview{
-    margin-top:20px;
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    white-space:pre-line;
-    line-height:1.8;
+.qr{
+position:absolute;
+right:2mm;
+bottom:2mm;
 }
 
-.note{
-    color:green;
-    font-size:13px;
+svg{
+width:36mm;
+height:10mm;
+}
+
+@media print{
+
+.top{
+display:none;
+}
+
+body{
+background:white;
+padding:0;
+}
+
 }
 
 </style>
+
 </head>
 
 <body>
 
-<div class="container">
+<div class='top'>
 
-<div class="card">
+<h1>ProSynergy A4 Label Printing Tool</h1>
 
-<h2>ProSynergy Contact QR Tool</h2>
+<table id='itemsTable'>
+<thead>
+<tr>
+<th>#</th>
+<th>Item Name</th>
+<th>Item Code</th>
+<th>Barcode Number</th>
+</tr>
+</thead>
 
-<label>Item Name</label>
-<input type="text" id="itemName" value="Double A A4 Paper 80 GSM">
+<tbody>
 
-<label>Item Code</label>
-<input type="text" id="itemCode" value="10025">
+</tbody>
 
-<label>Barcode Number</label>
-<input type="text" id="barcodeText" value="8851907100012">
+</table>
 
-<button onclick="generateLabel()">Generate Label</button>
-
-<button onclick="downloadPNG()">Download PNG</button>
-
-<p class="note">
-QR scans as a contact card and shows only Item Name & Item Code.
-</p>
-
-</div>
-
-<div class="card">
-
-<h2>Label Preview</h2>
-
-<div class="label" id="labelCapture">
-
-<div class="company">
-ProSynergy Medical System Pvt Ltd
-</div>
-
-<div class="item-name" id="displayName"></div>
-
-<div class="barcode-area">
-<svg id="barcode"></svg>
-<div id="displayBarcode" style="font-size:11px;"></div>
-</div>
-
-<div class="qr-area">
-<canvas id="qrcode"></canvas>
-</div>
+<button onclick='addRow()'>Add Row</button>
+<button onclick='generateLabels()'>Generate Labels</button>
+<button onclick='window.print()'>Print A4</button>
 
 </div>
 
-<div class="preview" id="previewText"></div>
-
-</div>
-
+<div class='sheet'>
+<div class='grid' id='labelsGrid'></div>
 </div>
 
 <script>
 
-function generateLabel(){
+const tbody = document.querySelector("#itemsTable tbody");
 
-let itemName = document.getElementById("itemName").value;
-let itemCode = document.getElementById("itemCode").value;
-let barcodeText = document.getElementById("barcodeText").value;
+/* DEFAULT 15 ROWS */
 
-document.getElementById("displayName").innerText = itemName;
-document.getElementById("displayBarcode").innerText = barcodeText;
+for(let i=1;i<=15;i++){
+
+addRow();
+
+}
+
+function addRow(){
+
+let row = document.createElement("tr");
+
+row.innerHTML = `
+<td></td>
+<td><input type="text" class="item"></td>
+<td><input type="text" class="code"></td>
+<td><input type="text" class="barcode"></td>
+`;
+
+tbody.appendChild(row);
+
+updateNumbers();
+
+}
+
+function updateNumbers(){
+
+let rows = tbody.querySelectorAll("tr");
+
+rows.forEach((r,index)=>{
+
+r.cells[0].innerText = index + 1;
+
+});
+
+}
+
+/* SAMPLE DATA */
+
+tbody.rows[0].querySelector(".item").value = "Double A A4 Paper 80 GSM";
+tbody.rows[0].querySelector(".code").value = "10025";
+tbody.rows[0].querySelector(".barcode").value = "8851907100012";
+
+tbody.rows[1].querySelector(".item").value = "Double A A3 Paper";
+tbody.rows[1].querySelector(".code").value = "10026";
+tbody.rows[1].querySelector(".barcode").value = "8851907100013";
+
+/* GENERATE LABELS */
+
+function generateLabels(){
+
+const grid = document.getElementById("labelsGrid");
+grid.innerHTML = "";
+
+let rows = tbody.querySelectorAll("tr");
+
+rows.forEach((row,index)=>{
+
+let item = row.querySelector(".item").value.trim();
+let code = row.querySelector(".code").value.trim();
+let barcode = row.querySelector(".barcode").value.trim();
+
+if(item && code && barcode){
+
+let label = document.createElement("div");
+label.className = "label";
+
+label.innerHTML = `
+<div class='company'>
+ProSynergy Medical System Pvt Ltd
+</div>
+
+<div class='item'>
+${item}
+</div>
+
+<div class='barcodeArea'>
+<svg id='b${index}'></svg>
+<div class='barcodeNo'>${barcode}</div>
+</div>
+
+<div class='qr'>
+<canvas id='q${index}'></canvas>
+</div>
+`;
+
+grid.appendChild(label);
 
 /* BARCODE */
 
-JsBarcode("#barcode", barcodeText,{
-    format:"CODE128",
-    width:1.4,
-    height:40,
-    displayValue:false,
-    margin:0
+JsBarcode("#b"+index, barcode,{
+format:"CODE128",
+width:1,
+height:20,
+displayValue:false,
+margin:0
 });
 
-/* VCARD CONTACT FORMAT */
+/* CONTACT CARD QR */
 
 let vCard =
 "BEGIN:VCARD\r\n" +
 "VERSION:3.0\r\n" +
-"N:" + itemName + ";;;;\r\n" +
-"FN:" + itemName + "\r\n" +
+"FN:" + item + "\r\n" +
 "ORG:ProSynergy Medical System Pvt Ltd\r\n" +
-"NOTE:Item Code : " + itemCode + "\r\n" +
+"NOTE:Item Code : " + code + "\r\n" +
 "END:VCARD";
 
-/* PREVIEW */
-
-document.getElementById("previewText").innerText =
-"Item Name : " + itemName + "\n" +
-"Item Code : " + itemCode;
-
-/* QR */
-
-let canvas = document.getElementById("qrcode");
-let ctx = canvas.getContext("2d");
-ctx.clearRect(0,0,canvas.width,canvas.height);
-
-QRCode.toCanvas(canvas, vCard,{
-    width:85,
-    margin:1,
-    errorCorrectionLevel:"L"
+QRCode.toCanvas(document.getElementById("q"+index), vCard,{
+width:60,
+margin:1,
+errorCorrectionLevel:"L"
 });
 
 }
-
-/* DOWNLOAD PNG */
-
-function downloadPNG(){
-
-html2canvas(document.querySelector("#labelCapture"),{
-    backgroundColor:"#ffffff",
-    scale:3
-}).then(canvas=>{
-
-    let link=document.createElement("a");
-    link.download="prosynergy-contact-card.png";
-    link.href=canvas.toDataURL();
-    link.click();
 
 });
 
 }
 
-generateLabel();
+generateLabels();
 
 </script>
 
