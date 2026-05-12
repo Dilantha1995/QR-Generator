@@ -1,300 +1,3741 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset='UTF-8'>
-<title>ProSynergy Label Tool</title>
-
-<script src='https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js'></script>
-<script src='https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js'></script>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InventoryPro — ERP Inventory Management</title>
 <style>
-
-body{
-font-family:Arial;
-background:#f2f2f2;
-padding:20px;
-margin:0;
+/* ═══ ERP DESIGN SYSTEM v1.0 ═══ */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f6f9;--surface:#fff;--s2:#f0f2f6;--s3:#e8ebf0;
+  --border:#dde1e8;--border2:#c8cdd8;
+  --text:#1c2030;--t2:#5c6478;--t3:#9ba3b5;
+  --blue:#1849a9;--blue2:#eef2fc;--blue3:#0d2d6e;
+  --green:#166534;--green2:#f0fdf4;--green3:#dcfce7;
+  --amber:#92400e;--amber2:#fffbeb;
+  --red:#991b1b;--red2:#fef2f2;--red3:#fee2e2;
+  --teal:#115e59;--teal2:#f0fdfa;
+  --orange:#c2410c;--orange2:#fff7ed;
+  --purple:#6b21a8;--purple2:#faf5ff;
+  --r:8px;--r2:12px;
 }
+html,body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;height:100%}
+body{overflow:hidden}
 
-h1{
-text-align:center;
-}
+/* TOPBAR */
+.topbar{background:var(--blue3);display:flex;align-items:center;justify-content:space-between;padding:0 18px;height:50px;position:sticky;top:0;z-index:60;box-shadow:0 2px 8px rgba(0,0,0,.2);color:#fff}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700}
+.logo-box{width:30px;height:30px;background:#fff;color:var(--blue3);border-radius:7px;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.logo-text{font-size:14px;font-weight:700}
+.logo-sub{font-size:11px;opacity:.7;padding-left:8px;border-left:1px solid rgba(255,255,255,.2);margin-left:4px}
+.global-search{flex:1;max-width:500px;position:relative;margin:0 20px}
+.global-search input{width:100%;padding:8px 14px 8px 36px;border:1.5px solid rgba(255,255,255,.2);border-radius:8px;font-size:13px;background:rgba(255,255,255,.08);color:#fff;outline:none}
+.global-search input::placeholder{color:rgba(255,255,255,.6)}
+.global-search input:focus{background:#fff;color:var(--text)}
+.gs-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.loc-pill,.cur-pill{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 11px;font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer}
+.loc-pill:hover,.cur-pill:hover{background:rgba(255,255,255,.18)}
+.cur-pill{font-weight:700}
+.urg-bell{position:relative;cursor:pointer;font-size:17px;padding:4px}
+.urg-count{position:absolute;top:-2px;right:-2px;background:#dc2626;color:#fff;font-size:9px;font-weight:800;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.user-pill{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border-radius:20px;padding:4px 12px 4px 4px;cursor:pointer}
+.user-av{width:26px;height:26px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff}
+.user-nm{font-size:12px;display:flex;flex-direction:column;line-height:1.1}
+.user-nm small{font-size:9px;opacity:.7}
 
-.top{
-background:white;
-padding:20px;
-border-radius:12px;
-margin-bottom:20px;
-}
+/* LAYOUT */
+.app-body{display:grid;grid-template-columns:230px 1fr;height:calc(100vh - 50px)}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:10px 0;overflow-y:auto}
+.nav-sec{font-size:9px;font-weight:800;color:var(--t3);padding:12px 16px 4px;text-transform:uppercase;letter-spacing:.09em}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 16px;font-size:12px;color:var(--t2);cursor:pointer;border-left:3px solid transparent;transition:all .12s;user-select:none}
+.ni:hover{background:var(--s2);color:var(--text)}
+.ni.active{background:var(--blue2);color:var(--blue);border-left-color:var(--blue);font-weight:600}
+.ni .ic{font-size:14px;width:18px;text-align:center}
+.ni .ct-badge{margin-left:auto;background:var(--blue);color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px}
+.ni .ct-badge.warn{background:var(--orange)}
+.main{overflow-y:auto;padding:20px 24px}
 
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:10px;
-}
+/* PAGE HEADER */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap}
+.pt{font-size:20px;font-weight:700;color:var(--text)}
+.ps{font-size:12px;color:var(--t2);margin-top:3px}
+.brow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 
-th,td{
-border:1px solid #ccc;
-padding:8px;
-text-align:left;
-}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:12px;cursor:pointer;font-weight:500;transition:all .12s;white-space:nowrap;line-height:1.4;font-family:inherit}
+.btn:hover{background:var(--s2)}
+.btn-p{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-p:hover{background:var(--blue3)}
+.btn-g{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-g:hover{filter:brightness(1.1)}
+.btn-r{background:var(--red);color:#fff;border-color:var(--red)}
+.btn-r:hover{filter:brightness(1.1)}
+.btn-o{background:var(--orange);color:#fff;border-color:var(--orange)}
+.btn-sm{padding:5px 11px;font-size:11px}
+.btn-xs{padding:3px 8px;font-size:10px;border-radius:6px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 
-input{
-width:100%;
-padding:8px;
-box-sizing:border-box;
-border:1px solid #ccc;
-border-radius:5px;
-}
+/* BADGES */
+.bdg{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.bd{width:5px;height:5px;border-radius:50%;background:currentColor}
+.b-draft{background:var(--s3);color:var(--t2)}
+.b-sub{background:#dbeafe;color:#1e40af}
+.b-ok{background:var(--green3);color:var(--green)}
+.b-warn{background:#fef3c7;color:var(--amber)}
+.b-bad{background:var(--red3);color:var(--red)}
+.b-info{background:var(--blue2);color:var(--blue)}
+.b-purple{background:var(--purple2);color:var(--purple)}
+.b-teal{background:var(--teal2);color:var(--teal)}
+.b-orange{background:var(--orange2);color:var(--orange)}
 
-button{
-padding:12px 20px;
-background:black;
-color:white;
-border:none;
-border-radius:8px;
-cursor:pointer;
-margin-top:15px;
-margin-right:10px;
-}
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:18px;margin-bottom:14px}
+.card-t{font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.card-flat{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:12px}
 
-.sheet{
-width:210mm;
-min-height:297mm;
-background:white;
-margin:auto;
-padding:8mm;
-box-sizing:border-box;
-}
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.g6{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
 
-.grid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:6mm;
-}
+/* STAT CARDS */
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;position:relative;overflow:hidden}
+.stat-l{font-size:10px;color:var(--t2);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.stat-v{font-size:20px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+.stat-s{font-size:10px;color:var(--t3);margin-top:3px;display:flex;align-items:center;gap:5px}
+.stat-i{position:absolute;top:12px;right:12px;font-size:18px;opacity:.4}
 
-.label{
-width:60mm;
-height:35mm;
-border:1px dashed #999;
-border-radius:3mm;
-position:relative;
-padding:2mm;
-overflow:hidden;
-box-sizing:border-box;
-}
+/* TABLES */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{background:var(--s2);text-align:left;padding:9px 12px;font-weight:700;color:var(--t2);font-size:11px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border);position:sticky;top:0}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tr:hover td{background:var(--s2)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl.click tr{cursor:pointer}
+.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.mono{font-family:'Consolas','Monaco',monospace;font-size:11px}
+.txt-r{text-align:right}
+.txt-c{text-align:center}
+.muted{color:var(--t2)}
+.muted-s{color:var(--t3);font-size:11px}
 
-.company{
-font-size:7px;
-text-align:center;
-color:#666;
-}
+/* INPUTS */
+.inp,.sel,.txa{width:100%;padding:8px 11px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;font-family:inherit;background:var(--surface);color:var(--text);outline:none}
+.inp:focus,.sel:focus,.txa:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,73,169,.1)}
+.lbl{display:block;font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.fld{margin-bottom:13px}
+.txa{min-height:70px;resize:vertical;font-family:inherit}
+.chk{display:flex;align-items:center;gap:7px;font-size:12px;cursor:pointer;padding:5px 0}
+.chk input{accent-color:var(--blue);width:14px;height:14px}
 
-.item{
-font-size:10px;
-font-weight:bold;
-text-align:center;
-height:10mm;
-overflow:hidden;
-}
+/* MODAL */
+.mb{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;overflow-y:auto}
+.md{background:var(--surface);border-radius:var(--r2);width:100%;max-width:680px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.md.lg{max-width:920px}
+.md.xl{max-width:1140px}
+.md.sm{max-width:440px}
+.mh{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.mt{font-size:15px;font-weight:700}
+.ms{font-size:11px;color:var(--t2);margin-top:2px}
+.mx{cursor:pointer;font-size:22px;color:var(--t2);line-height:1;border:none;background:none;padding:2px 8px;border-radius:6px}
+.mx:hover{background:var(--s2)}
+.mc{padding:20px 22px;overflow-y:auto;flex:1}
+.mf{padding:13px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;background:var(--s2)}
 
-.barcodeArea{
-width:36mm;
-text-align:center;
-}
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto}
+.tab{padding:9px 16px;font-size:12px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;font-weight:500;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
 
-.barcodeNo{
-font-size:7px;
-}
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:11px 22px;border-radius:var(--r);font-size:12px;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:tin .25s}
+.toast.ok{background:var(--green)}
+.toast.err{background:var(--red)}
+.toast.warn{background:var(--orange)}
+@keyframes tin{from{opacity:0;transform:translate(-50%,15px)}to{opacity:1;transform:translate(-50%,0)}}
 
-.qr{
-position:absolute;
-right:2mm;
-bottom:2mm;
-}
+/* AI ASSISTANT */
+.ai-fab{position:fixed;bottom:22px;right:22px;width:54px;height:54px;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:50%;color:#fff;font-size:24px;cursor:pointer;border:none;box-shadow:0 6px 20px rgba(79,70,229,.4);z-index:100;display:flex;align-items:center;justify-content:center}
+.ai-fab:hover{transform:scale(1.05)}
+.ai-panel{position:fixed;bottom:22px;right:22px;width:380px;height:540px;background:var(--surface);border-radius:var(--r2);box-shadow:0 20px 60px rgba(0,0,0,.25);z-index:101;display:flex;flex-direction:column;border:1px solid var(--border)}
+.ai-h{padding:14px 16px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-radius:var(--r2) var(--r2) 0 0;display:flex;justify-content:space-between;align-items:center}
+.ai-h-t{font-size:13px;font-weight:700}
+.ai-h-s{font-size:10px;opacity:.85}
+.ai-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ai-m{padding:9px 13px;border-radius:var(--r);font-size:12px;max-width:88%;line-height:1.5;word-wrap:break-word}
+.ai-m.u{background:var(--blue2);color:var(--blue3);align-self:flex-end}
+.ai-m.a{background:var(--s2);color:var(--text);align-self:flex-start}
+.ai-m.s{background:#fef3c7;color:var(--amber);font-size:11px;align-self:center;text-align:center;font-style:italic}
+.ai-in{padding:12px;border-top:1px solid var(--border);display:flex;gap:6px}
+.ai-in input{flex:1;padding:8px 11px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;outline:none}
+.ai-in input:focus{border-color:var(--blue)}
+.ai-in button{padding:8px 14px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:600}
 
-svg{
-width:36mm;
-height:10mm;
-}
+/* LOGIN */
+.login-wrap{position:fixed;inset:0;background:linear-gradient(135deg,#0d2d6e,#1849a9);display:flex;align-items:center;justify-content:center;z-index:300}
+.login-card{background:#fff;border-radius:14px;padding:32px;width:420px;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.login-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:24px}
+.login-logo .logo-box{width:48px;height:48px;font-size:14px;background:var(--blue3);color:#fff;margin-bottom:10px}
+.login-title{font-size:18px;font-weight:700;text-align:center}
+.login-sub{font-size:12px;color:var(--t2);text-align:center;margin-top:4px;margin-bottom:24px}
+.demo-users{display:grid;grid-template-columns:1fr;gap:8px;margin-top:14px}
+.demo-u{padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .15s;text-align:left;background:#fff}
+.demo-u:hover{border-color:var(--blue);background:var(--blue2)}
+.demo-u-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.demo-u-info{flex:1}
+.demo-u-name{font-size:13px;font-weight:600}
+.demo-u-role{font-size:10px;color:var(--t2)}
 
-@media print{
+/* PIC UPLOAD */
+.pic-row{display:flex;gap:10px}
+.pic-slot{flex:1;aspect-ratio:1;border:2px dashed var(--border2);border-radius:var(--r);background:var(--s2);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden}
+.pic-slot:hover{border-color:var(--blue);background:var(--blue2)}
+.pic-slot img{width:100%;height:100%;object-fit:cover}
+.pic-slot .ph-txt{font-size:11px;color:var(--t3);text-align:center;padding:6px}
+.pic-slot .pic-rm{position:absolute;top:4px;right:4px;background:var(--red);color:#fff;border:none;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:14px;line-height:1;display:none}
+.pic-slot.has-img .pic-rm{display:flex;align-items:center;justify-content:center}
 
-.top{
-display:none;
-}
+/* APPROVAL FLOW */
+.appr-flow{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.appr-step{padding:5px 10px;border-radius:6px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:5px}
+.appr-step.done{background:var(--green3);color:var(--green)}
+.appr-step.cur{background:#fef3c7;color:var(--amber);border:1.5px solid var(--amber)}
+.appr-step.pend{background:var(--s3);color:var(--t2)}
+.appr-step.rej{background:var(--red3);color:var(--red)}
+.appr-arr{color:var(--t3);font-size:10px}
 
-body{
-background:white;
-padding:0;
-}
-
-}
-
+/* MISC */
+.ftext{font-size:11px;color:var(--t2);margin-top:4px}
+.kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--border);font-size:12px}
+.kv:last-child{border-bottom:none}
+.kv .k{color:var(--t2)}
+.kv .v{font-weight:600}
+.sep{height:1px;background:var(--border);margin:14px 0}
+.tag{display:inline-block;padding:2px 7px;background:var(--s3);border-radius:4px;font-size:10px;font-weight:600;color:var(--t2);margin-right:3px}
+.alert-banner{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;padding:14px 18px;border-radius:var(--r2);margin-bottom:14px;display:flex;align-items:flex-start;gap:12px}
+.alert-banner .ic{font-size:22px}
+.alert-banner h4{font-size:13px;margin-bottom:3px}
+.alert-banner p{font-size:11px;opacity:.95;line-height:1.5}
+.search-bar{position:relative;flex:1;max-width:320px}
+.search-bar input{width:100%;padding:7px 11px 7px 30px;border:1px solid var(--border2);border-radius:var(--r);font-size:12px;outline:none}
+.search-bar input:focus{border-color:var(--blue)}
+.search-bar::before{content:"🔍";position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;opacity:.5}
+.empty{padding:40px;text-align:center;color:var(--t2)}
+.empty .ic{font-size:36px;opacity:.4;margin-bottom:8px}
+.bar{height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-top:4px}
+.bar-fill{height:100%;background:var(--blue);border-radius:3px}
+.bar-fill.g{background:var(--green)}
+.bar-fill.a{background:var(--amber)}
+.bar-fill.r{background:var(--red)}
+.pop{position:absolute;top:55px;background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:0 10px 30px rgba(0,0,0,.15);min-width:220px;z-index:80;color:var(--text);overflow:hidden}
+.pop-item{padding:9px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.pop-item:last-child{border-bottom:none}
+.pop-item:hover{background:var(--s2)}
+.pop-item.active{background:var(--blue2);color:var(--blue);font-weight:600}
+.pop-item .sub{margin-left:auto;font-size:10px;color:var(--t3)}
 </style>
-
 </head>
-
 <body>
 
-<div class='top'>
+<!-- LOGIN SCREEN -->
+<div class="login-wrap" id="login">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-box">IP</div>
+      <div class="login-title">InventoryPro</div>
+      <div class="login-sub">ERP Inventory Management • Demo Mode</div>
+    </div>
+    <div class="lbl">Select a demo user to continue</div>
+    <div class="demo-users" id="demoUsers"></div>
+    <div style="margin-top:18px;padding:10px 12px;background:var(--amber2);border-radius:6px;font-size:11px;color:var(--amber);line-height:1.5">
+      <strong>ℹ Demo mode:</strong> Each user has different permissions and approval authority. Try logging in as different roles to see how approvals work.
+    </div>
+  </div>
+</div>
 
-<h1>ProSynergy A4 Label Printing Tool</h1>
+<!-- MAIN APP (hidden until login) -->
+<div id="app" style="display:none">
 
-<table id='itemsTable'>
-<thead>
-<tr>
-<th>#</th>
-<th>Item Name</th>
-<th>Item Code</th>
-<th>Barcode Number</th>
-</tr>
-</thead>
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-box">IP</div>
+    <div>
+      <div class="logo-text">InventoryPro</div>
+    </div>
+    <div class="logo-sub">Inventory Management</div>
+  </div>
+  <div class="global-search">
+    <span class="gs-icon">🔍</span>
+    <input type="text" placeholder="Search items, lots, GRNs, transfers, vendors..." id="globalSearch">
+  </div>
+  <div class="topbar-right">
+    <div class="loc-pill" onclick="toggleLocSwitch(event)" style="position:relative">
+      <span>📍</span><span id="curLocName">All Locations</span><span style="font-size:9px">▼</span>
+    </div>
+    <div class="cur-pill" onclick="toggleCurSwitch(event)" style="position:relative">
+      <span id="curCurCode">MVR</span><span style="font-size:9px">▼</span>
+    </div>
+    <div class="urg-bell" onclick="go('alerts')">
+      🔔<span class="urg-count" id="alertCount">0</span>
+    </div>
+    <div class="user-pill" onclick="toggleUserMenu(event)" style="position:relative">
+      <div class="user-av" id="userAv">??</div>
+      <div class="user-nm">
+        <span id="userName">User</span>
+        <small id="userRole">role</small>
+      </div>
+    </div>
+  </div>
+</div>
 
-<tbody>
-
-</tbody>
-
-</table>
-
-<button onclick='addRow()'>Add Row</button>
-<button onclick='generateLabels()'>Generate Labels</button>
-<button onclick='window.print()'>Print A4</button>
+<div class="app-body">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="main" id="main"></div>
+</div>
 
 </div>
 
-<div class='sheet'>
-<div class='grid' id='labelsGrid'></div>
-</div>
+<div id="modals"></div>
+<div id="toasts"></div>
+<div id="popups"></div>
+
+<!-- AI Assistant -->
+<button class="ai-fab" id="aiFab" onclick="toggleAI()" style="display:none">✨</button>
+<div id="aiPanel" style="display:none"></div>
 
 <script>
+/* ═══════════════════════════════════════════════════════
+   STATE — All app data lives here. Every mutation goes
+   through state functions, then re-renders.
+   ═══════════════════════════════════════════════════════ */
 
-const tbody = document.querySelector("#itemsTable tbody");
+const STATE = {
+  // Current session
+  currentUser: null,
+  currentLocation: 'all',
+  currentCurrency: 'MVR',
+  currentPage: 'dashboard',
 
-/* DEFAULT 15 ROWS */
+  // Demo users with roles & permissions
+  users: [
+    {id:'u1',name:'Ibrahim Rasheed',email:'ibrahim@company.mv',role:'Inventory Manager',avatar:'IR',color:'#2563eb',
+     permissions:['view_all','create_item','edit_item','create_grn','post_grn','create_transfer','approve_transfer','create_adjustment','approve_adjustment_l1','approve_adjustment_l2','view_reports','manage_setup'],
+     approvalLevel:2},
+    {id:'u2',name:'Aishath Naseema',email:'aishath@company.mv',role:'Warehouse Supervisor',avatar:'AN',color:'#7c3aed',
+     permissions:['view_all','create_item','create_grn','create_transfer','create_adjustment','approve_adjustment_l1','view_reports'],
+     approvalLevel:1},
+    {id:'u3',name:'Mohamed Shareef',email:'shareef@company.mv',role:'Stock Clerk',avatar:'MS',color:'#059669',
+     permissions:['view_all','create_grn','create_transfer','create_adjustment','create_request'],
+     approvalLevel:0},
+    {id:'u4',name:'Fathimath Liusha',email:'liusha@company.mv',role:'Finance Controller',avatar:'FL',color:'#dc2626',
+     permissions:['view_all','approve_bill','approve_adjustment_l1','approve_adjustment_l2','approve_grn_finance','manage_costing','view_reports','manage_accounts'],
+     approvalLevel:3},
+    {id:'u5',name:'Ahmed Nashid',email:'nashid@company.mv',role:'CEO / Admin',avatar:'AN',color:'#ea580c',
+     permissions:['*'], // wildcard - everything
+     approvalLevel:99}
+  ],
 
-for(let i=1;i<=15;i++){
+  // Chart of Accounts (from Accounts module integration)
+  // These are the GL accounts that items can link to
+  accounts: [
+    // Assets - Inventory
+    {code:'1310',name:'Inventory - Raw Materials',type:'Asset',category:'Inventory'},
+    {code:'1320',name:'Inventory - Finished Goods',type:'Asset',category:'Inventory'},
+    {code:'1330',name:'Inventory - Trading Stock',type:'Asset',category:'Inventory'},
+    {code:'1340',name:'Inventory - Consumables',type:'Asset',category:'Inventory'},
+    {code:'1350',name:'Inventory - F&B Stock',type:'Asset',category:'Inventory'},
+    {code:'1360',name:'Inventory - Spare Parts',type:'Asset',category:'Inventory'},
+    {code:'1370',name:'Inventory - In Transit',type:'Asset',category:'Inventory'},
+    // Cost of Goods Sold
+    {code:'5100',name:'COGS - Trading',type:'Expense',category:'COGS'},
+    {code:'5110',name:'COGS - F&B',type:'Expense',category:'COGS'},
+    {code:'5120',name:'COGS - Manufacturing',type:'Expense',category:'COGS'},
+    {code:'5130',name:'COGS - Consumables Used',type:'Expense',category:'COGS'},
+    // Revenue
+    {code:'4100',name:'Sales Revenue - Trading',type:'Revenue',category:'Sales'},
+    {code:'4110',name:'Sales Revenue - F&B',type:'Revenue',category:'Sales'},
+    {code:'4120',name:'Sales Revenue - Services',type:'Revenue',category:'Sales'},
+    // Variance & Adjustment accounts
+    {code:'5910',name:'Inventory Adjustment - Damage',type:'Expense',category:'Adjustment'},
+    {code:'5920',name:'Inventory Adjustment - Expiry',type:'Expense',category:'Adjustment'},
+    {code:'5930',name:'Inventory Adjustment - Count Variance',type:'Expense',category:'Adjustment'},
+    {code:'5940',name:'Inventory Adjustment - Theft/Loss',type:'Expense',category:'Adjustment'},
+    {code:'4910',name:'Inventory Adjustment - Gain',type:'Revenue',category:'Adjustment'}
+  ],
 
-addRow();
+  // Approval rules - configurable per document type & threshold
+  approvalRules: [
+    {id:'ar1',doc:'Adjustment',condition:'value<5000',levels:1,roles:['Warehouse Supervisor','Inventory Manager','CEO / Admin'],desc:'Small adjustments under MVR 5,000'},
+    {id:'ar2',doc:'Adjustment',condition:'value>=5000 AND value<25000',levels:2,roles:['Inventory Manager','Finance Controller'],desc:'Medium adjustments MVR 5K-25K'},
+    {id:'ar3',doc:'Adjustment',condition:'value>=25000',levels:3,roles:['Inventory Manager','Finance Controller','CEO / Admin'],desc:'Large adjustments above MVR 25K'},
+    {id:'ar4',doc:'Transfer',condition:'always',levels:1,roles:['Inventory Manager'],desc:'All inter-location transfers'},
+    {id:'ar5',doc:'GRN',condition:'value>50000',levels:1,roles:['Finance Controller'],desc:'High-value GRNs need finance review'},
+    {id:'ar6',doc:'Vendor Bill',condition:'discrepancy>2%',levels:2,roles:['Inventory Manager','Finance Controller'],desc:'Bills with >2% variance from PO'},
+    {id:'ar7',doc:'Goods Request',condition:'always',levels:1,roles:['Inventory Manager','Warehouse Supervisor'],desc:'All goods requests'},
+    {id:'ar8',doc:'Item',condition:'always',levels:1,roles:['Inventory Manager','Finance Controller'],desc:'New item master creation'}
+  ],
 
+  // Locations
+  locations: [
+    {id:'L1',name:'Male Main Warehouse',code:'MAL-WH',address:'Industrial Zone, Male',type:'Warehouse',sublocations:['Receiving','Bulk Storage','Pick Zone A','Pick Zone B','Quarantine','Dispatch']},
+    {id:'L2',name:'Hulhumale Branch',code:'HUL-BR',address:'Hulhumale Phase 2',type:'Branch',sublocations:['Retail Floor','Stock Room','Display']},
+    {id:'L3',name:'Addu Distribution',code:'ADD-DC',address:'Hithadhoo, Addu City',type:'Distribution',sublocations:['Inbound','Outbound','Cold Storage']},
+    {id:'L4',name:'Resort Supply Hub',code:'RES-HUB',address:'Hulhumale Port Area',type:'Hub',sublocations:['Cold Chain','Dry Stores','Beverages','F&B Prep']}
+  ],
+
+  // Currencies
+  currencies: [
+    {code:'MVR',name:'Maldivian Rufiyaa',symbol:'Rf',rate:1.00,base:true},
+    {code:'USD',name:'US Dollar',symbol:'$',rate:15.42},
+    {code:'EUR',name:'Euro',symbol:'€',rate:16.85},
+    {code:'LKR',name:'Sri Lankan Rupee',symbol:'Rs',rate:0.051},
+    {code:'INR',name:'Indian Rupee',symbol:'₹',rate:0.185}
+  ],
+
+  // Categories
+  categories: [
+    {id:'C1',name:'Electronics',code:'ELEC',parent:null,glAsset:'1330',glCogs:'5100',glRev:'4100'},
+    {id:'C2',name:'Office Supplies',code:'OFF',parent:null,glAsset:'1340',glCogs:'5130',glRev:'4100'},
+    {id:'C3',name:'F&B - Beverages',code:'FB-BEV',parent:null,glAsset:'1350',glCogs:'5110',glRev:'4110'},
+    {id:'C4',name:'F&B - Food',code:'FB-FOOD',parent:null,glAsset:'1350',glCogs:'5110',glRev:'4110'},
+    {id:'C5',name:'Cleaning & Chemicals',code:'CLEAN',parent:null,glAsset:'1340',glCogs:'5130',glRev:'4100'},
+    {id:'C6',name:'Hardware & Tools',code:'HARD',parent:null,glAsset:'1360',glCogs:'5100',glRev:'4100'},
+    {id:'C7',name:'Pharmacy',code:'PHARM',parent:null,glAsset:'1330',glCogs:'5100',glRev:'4100'},
+    {id:'C8',name:'Linens & Amenities',code:'LIN',parent:null,glAsset:'1330',glCogs:'5100',glRev:'4100'}
+  ],
+
+  // UOMs
+  uoms: [
+    {code:'PCS',name:'Pieces',type:'Quantity'},
+    {code:'BOX',name:'Box',type:'Quantity'},
+    {code:'CTN',name:'Carton',type:'Quantity'},
+    {code:'KG',name:'Kilogram',type:'Weight'},
+    {code:'G',name:'Gram',type:'Weight'},
+    {code:'L',name:'Liter',type:'Volume'},
+    {code:'ML',name:'Milliliter',type:'Volume'},
+    {code:'M',name:'Meter',type:'Length'},
+    {code:'PACK',name:'Pack',type:'Quantity'},
+    {code:'BTL',name:'Bottle',type:'Quantity'},
+    {code:'DOZ',name:'Dozen',type:'Quantity'}
+  ],
+
+  // Reason codes for adjustments
+  reasonCodes: [
+    {code:'DMG',name:'Damaged goods',glAccount:'5910'},
+    {code:'EXP',name:'Expired stock write-off',glAccount:'5920'},
+    {code:'CNT',name:'Stock count variance',glAccount:'5930'},
+    {code:'THEFT',name:'Theft / shrinkage',glAccount:'5940'},
+    {code:'SAMPLE',name:'Sample / Marketing',glAccount:'5930'},
+    {code:'FOUND',name:'Found stock (positive)',glAccount:'4910'},
+    {code:'CORR',name:'System correction',glAccount:'5930'},
+    {code:'QUAL',name:'Quality reject',glAccount:'5910'},
+    {code:'SPILL',name:'Spillage / breakage',glAccount:'5910'},
+    {code:'OBSL',name:'Obsolete write-down',glAccount:'5920'}
+  ],
+
+  // Items master (with all features: multi-UOM, multi-barcode, lots, expiry, pics, GL links)
+  items: [
+    {id:'I1001',sku:'EL-LP-001',name:'Dell Latitude 5520 Laptop',category:'C1',uom:'PCS',
+     costMethod:'WAC',avgCost:24500,lastCost:25200,sellPrice:32000,minStock:5,maxStock:50,reorderQty:10,
+     trackLot:false,trackExpiry:false,active:true,
+     glAsset:'1330',glCogs:'5100',glRev:'4100',
+     barcodes:['1234567890123','EL-LP-001'],
+     altUoms:[{uom:'BOX',factor:5,barcode:'1234567890124'}],
+     pic1:null,pic2:null,
+     vendors:['Tech Distributors Ltd','IT Solutions Maldives'],
+     description:'Business laptop Intel i5, 16GB RAM, 512GB SSD',
+     weight:2.1,dimensions:'35x24x2 cm'},
+    {id:'I1002',sku:'EL-MN-001',name:'Samsung 24" Monitor S24F350',category:'C1',uom:'PCS',
+     costMethod:'WAC',avgCost:4200,lastCost:4350,sellPrice:5800,minStock:3,maxStock:30,reorderQty:8,
+     trackLot:false,trackExpiry:false,active:true,
+     glAsset:'1330',glCogs:'5100',glRev:'4100',
+     barcodes:['1234567890200'],altUoms:[],pic1:null,pic2:null,
+     vendors:['Tech Distributors Ltd'],description:'24-inch IPS Full HD Monitor',weight:3.8},
+    {id:'I2001',sku:'OF-PR-A4',name:'A4 Printing Paper 80gsm (500 sheets)',category:'C2',uom:'PACK',
+     costMethod:'FIFO',avgCost:85,lastCost:88,sellPrice:115,minStock:50,maxStock:500,reorderQty:100,
+     trackLot:false,trackExpiry:false,active:true,
+     glAsset:'1340',glCogs:'5130',glRev:'4100',
+     barcodes:['8801234567001','OF-PR-A4'],
+     altUoms:[{uom:'BOX',factor:5,barcode:'8801234567002'},{uom:'CTN',factor:25,barcode:'8801234567003'}],
+     pic1:null,pic2:null,vendors:['Office Mart','Paper Supplies Co']},
+    {id:'I3001',sku:'FB-WB-500',name:'Mineral Water 500ml',category:'C3',uom:'BTL',
+     costMethod:'FEFO',avgCost:4.5,lastCost:4.8,sellPrice:8,minStock:200,maxStock:2000,reorderQty:500,
+     trackLot:true,trackExpiry:true,active:true,
+     glAsset:'1350',glCogs:'5110',glRev:'4110',
+     barcodes:['8901234560011'],
+     altUoms:[{uom:'PACK',factor:24,barcode:'8901234560012'},{uom:'CTN',factor:288,barcode:'8901234560013'}],
+     pic1:null,pic2:null,vendors:['Aqua Maldives','Island Beverages'],
+     description:'Spring water 500ml bottle'},
+    {id:'I3002',sku:'FB-COKE-330',name:'Coca Cola Can 330ml',category:'C3',uom:'PCS',
+     costMethod:'FEFO',avgCost:7.2,lastCost:7.5,sellPrice:12,minStock:100,maxStock:1500,reorderQty:300,
+     trackLot:true,trackExpiry:true,active:true,
+     glAsset:'1350',glCogs:'5110',glRev:'4110',
+     barcodes:['5449000000996'],
+     altUoms:[{uom:'PACK',factor:24,barcode:'5449000000997'}],
+     pic1:null,pic2:null,vendors:['Coca Cola Maldives']},
+    {id:'I4001',sku:'FB-CHK-FRZ',name:'Frozen Chicken Breast (per kg)',category:'C4',uom:'KG',
+     costMethod:'FEFO',avgCost:165,lastCost:172,sellPrice:240,minStock:50,maxStock:500,reorderQty:100,
+     trackLot:true,trackExpiry:true,active:true,
+     glAsset:'1350',glCogs:'5110',glRev:'4110',
+     barcodes:['CHK-FRZ-001'],altUoms:[],pic1:null,pic2:null,
+     vendors:['Premium Foods Co','Halal Meats Ltd']},
+    {id:'I5001',sku:'CL-FLR-5L',name:'Floor Cleaner Concentrate 5L',category:'C5',uom:'BTL',
+     costMethod:'FIFO',avgCost:285,lastCost:295,sellPrice:420,minStock:20,maxStock:200,reorderQty:50,
+     trackLot:false,trackExpiry:true,active:true,
+     glAsset:'1340',glCogs:'5130',glRev:'4100',
+     barcodes:['CL-FLR-5L'],altUoms:[],pic1:null,pic2:null,
+     vendors:['Clean Solutions','Chemical Imports Ltd']},
+    {id:'I6001',sku:'HW-DRL-001',name:'Cordless Drill 18V Kit',category:'C6',uom:'PCS',
+     costMethod:'WAC',avgCost:1850,lastCost:1920,sellPrice:2650,minStock:5,maxStock:40,reorderQty:10,
+     trackLot:false,trackExpiry:false,active:true,
+     glAsset:'1360',glCogs:'5100',glRev:'4100',
+     barcodes:['HW-DRL-001'],altUoms:[],pic1:null,pic2:null,vendors:['Hardware Pro']},
+    {id:'I7001',sku:'PH-PCM-500',name:'Paracetamol 500mg (10x10 tablets)',category:'C7',uom:'BOX',
+     costMethod:'FEFO',avgCost:42,lastCost:44,sellPrice:65,minStock:30,maxStock:300,reorderQty:80,
+     trackLot:true,trackExpiry:true,active:true,
+     glAsset:'1330',glCogs:'5100',glRev:'4100',
+     barcodes:['PH-PCM-500'],altUoms:[],pic1:null,pic2:null,
+     vendors:['Medicore Pharma','Apollo Distributors']},
+    {id:'I8001',sku:'LN-TWL-BTH',name:'Bath Towel 70x140cm White',category:'C8',uom:'PCS',
+     costMethod:'WAC',avgCost:185,lastCost:195,sellPrice:280,minStock:50,maxStock:400,reorderQty:100,
+     trackLot:false,trackExpiry:false,active:true,
+     glAsset:'1330',glCogs:'5100',glRev:'4100',
+     barcodes:['LN-TWL-BTH'],altUoms:[{uom:'DOZ',factor:12}],pic1:null,pic2:null,
+     vendors:['Hospitality Linens']},
+    {id:'I8002',sku:'LN-SOAP-30',name:'Hotel Soap Bar 30g',category:'C8',uom:'PCS',
+     costMethod:'FIFO',avgCost:6.5,lastCost:7,sellPrice:12,minStock:500,maxStock:5000,reorderQty:1500,
+     trackLot:false,trackExpiry:true,active:true,
+     glAsset:'1330',glCogs:'5100',glRev:'4100',
+     barcodes:['LN-SOAP-30'],altUoms:[{uom:'CTN',factor:500}],pic1:null,pic2:null,
+     vendors:['Hospitality Linens','Amenity Supplies']}
+  ],
+
+  // Stock balances - itemId x locationId -> qty
+  stock: {
+    'I1001':{L1:18,L2:6,L3:4,L4:0},
+    'I1002':{L1:12,L2:8,L3:3,L4:0},
+    'I2001':{L1:284,L2:65,L3:42,L4:18},
+    'I3001':{L1:1850,L2:520,L3:380,L4:1200},
+    'I3002':{L1:1240,L2:380,L3:0,L4:850},
+    'I4001':{L1:0,L2:0,L3:42,L4:185},
+    'I5001':{L1:85,L2:18,L3:22,L4:34},
+    'I6001':{L1:24,L2:8,L3:6,L4:0},
+    'I7001':{L1:142,L2:38,L3:24,L4:0},
+    'I8001':{L1:220,L2:45,L3:0,L4:380},
+    'I8002':{L1:2840,L2:380,L3:280,L4:3200}
+  },
+
+  // Lots (for trackLot items)
+  lots: [
+    {id:'LOT-001',itemId:'I3001',lotNo:'WB240928A',mfgDate:'2024-09-28',expDate:'2026-09-28',qty:1850,locationId:'L1',cost:4.5,vendor:'Aqua Maldives'},
+    {id:'LOT-002',itemId:'I3001',lotNo:'WB241115B',mfgDate:'2024-11-15',expDate:'2026-11-15',qty:520,locationId:'L2',cost:4.6,vendor:'Aqua Maldives'},
+    {id:'LOT-003',itemId:'I3001',lotNo:'WB250120C',mfgDate:'2025-01-20',expDate:'2027-01-20',qty:1200,locationId:'L4',cost:4.8,vendor:'Island Beverages'},
+    {id:'LOT-004',itemId:'I3002',lotNo:'CC2511',mfgDate:'2025-11-01',expDate:'2026-08-01',qty:850,locationId:'L4',cost:7.5,vendor:'Coca Cola Maldives'},
+    {id:'LOT-005',itemId:'I4001',lotNo:'CHK260301',mfgDate:'2026-03-01',expDate:'2026-06-01',qty:185,locationId:'L4',cost:172,vendor:'Premium Foods Co'},
+    {id:'LOT-006',itemId:'I4001',lotNo:'CHK260415',mfgDate:'2026-04-15',expDate:'2026-07-15',qty:42,locationId:'L3',cost:165,vendor:'Halal Meats Ltd'},
+    {id:'LOT-007',itemId:'I7001',lotNo:'PCM-MED-2024',mfgDate:'2024-06-10',expDate:'2026-06-10',qty:38,locationId:'L2',cost:42,vendor:'Medicore Pharma'},
+    {id:'LOT-008',itemId:'I7001',lotNo:'PCM-APL-2025',mfgDate:'2025-04-20',expDate:'2027-04-20',qty:142,locationId:'L1',cost:44,vendor:'Apollo Distributors'}
+  ],
+
+  // Vendors
+  vendors: [
+    {id:'V1',name:'Tech Distributors Ltd',contact:'Hassan Ahmed',phone:'+960 332-1234'},
+    {id:'V2',name:'IT Solutions Maldives',contact:'Niyaz',phone:'+960 332-5678'},
+    {id:'V3',name:'Office Mart',contact:'Sales Team',phone:'+960 333-0011'},
+    {id:'V4',name:'Aqua Maldives',contact:'Operations',phone:'+960 333-0022'},
+    {id:'V5',name:'Coca Cola Maldives',contact:'Distribution',phone:'+960 333-0033'},
+    {id:'V6',name:'Premium Foods Co',contact:'Cold Chain',phone:'+960 333-0044'},
+    {id:'V7',name:'Halal Meats Ltd',contact:'Sales',phone:'+960 333-0055'},
+    {id:'V8',name:'Clean Solutions',contact:'Trading',phone:'+960 333-0066'},
+    {id:'V9',name:'Hardware Pro',contact:'Showroom',phone:'+960 333-0077'},
+    {id:'V10',name:'Medicore Pharma',contact:'Reg. Pharmacist',phone:'+960 333-0088'},
+    {id:'V11',name:'Apollo Distributors',contact:'B2B',phone:'+960 333-0099'},
+    {id:'V12',name:'Hospitality Linens',contact:'Resort Sales',phone:'+960 333-0110'}
+  ],
+
+  // GRNs (Goods Receipt Notes)
+  grns: [
+    {id:'GRN-2620',date:'2026-05-09',vendor:'V1',location:'L1',poRef:'PO-1180',currency:'MVR',
+     status:'Posted',createdBy:'u3',
+     lines:[
+       {itemId:'I1001',poQty:10,recvQty:10,uom:'PCS',unitCost:25200,lineTotal:252000},
+       {itemId:'I1002',poQty:5,recvQty:5,uom:'PCS',unitCost:4350,lineTotal:21750}
+     ],
+     freight:3200,duty:18500,insurance:850,absorptionMethod:'value',
+     approvals:[{userId:'u3',role:'Stock Clerk',action:'Created',ts:'2026-05-09 09:14',note:'Goods received in good condition'},
+                {userId:'u1',role:'Inventory Manager',action:'Approved',ts:'2026-05-09 10:22',note:'Verified counts'}]
+    },
+    {id:'GRN-2621',date:'2026-05-09',vendor:'V4',location:'L4',poRef:'PO-1182',currency:'MVR',
+     status:'Posted',createdBy:'u3',
+     lines:[
+       {itemId:'I3001',poQty:1200,recvQty:1200,uom:'BTL',unitCost:4.8,lineTotal:5760},
+       {itemId:'I3002',poQty:850,recvQty:850,uom:'PCS',unitCost:7.5,lineTotal:6375}
+     ],
+     freight:850,duty:0,insurance:120,absorptionMethod:'value',
+     approvals:[{userId:'u3',role:'Stock Clerk',action:'Created',ts:'2026-05-09 14:30'},
+                {userId:'u2',role:'Warehouse Supervisor',action:'Approved',ts:'2026-05-09 15:10'}]
+    },
+    {id:'GRN-2622',date:'2026-05-10',vendor:'V8',location:'L1',poRef:'PO-1185',currency:'MVR',
+     status:'Pending Approval',createdBy:'u3',
+     lines:[
+       {itemId:'I5001',poQty:50,recvQty:48,uom:'BTL',unitCost:295,lineTotal:14160}
+     ],
+     freight:450,duty:0,insurance:0,absorptionMethod:'qty',
+     billRef:'BILL-BOS-3344',billAmount:17140,discrepancy:2980,
+     approvals:[{userId:'u3',role:'Stock Clerk',action:'Created',ts:'2026-05-10 11:20',note:'2 bottles short - to verify with vendor'}]
+    },
+    {id:'GRN-2623',date:'2026-05-10',vendor:'V10',location:'L1',poRef:'PO-1186',currency:'MVR',
+     status:'Draft',createdBy:'u3',
+     lines:[
+       {itemId:'I7001',poQty:80,recvQty:80,uom:'BOX',unitCost:44,lineTotal:3520}
+     ],
+     freight:120,duty:0,insurance:0,absorptionMethod:'value',
+     approvals:[{userId:'u3',role:'Stock Clerk',action:'Created',ts:'2026-05-10 16:45'}]
+    }
+  ],
+
+  // Transfers
+  transfers: [
+    {id:'TR-1450',date:'2026-05-08',fromLoc:'L1',toLoc:'L4',status:'Posted',createdBy:'u3',
+     lines:[{itemId:'I3001',qty:600,uom:'BTL'},{itemId:'I3002',qty:400,uom:'PCS'}],
+     approvals:[{userId:'u3',role:'Stock Clerk',action:'Created',ts:'2026-05-08 08:30'},
+                {userId:'u1',role:'Inventory Manager',action:'Approved',ts:'2026-05-08 09:15'}]},
+    {id:'TR-1451',date:'2026-05-10',fromLoc:'L1',toLoc:'L2',status:'In Transit',createdBy:'u3',
+     lines:[{itemId:'I2001',qty:50,uom:'PACK'},{itemId:'I8002',qty:500,uom:'PCS'}],
+     approvals:[{userId:'u3',role:'Stock Clerk',action:'Created',ts:'2026-05-10 14:00'},
+                {userId:'u1',role:'Inventory Manager',action:'Approved',ts:'2026-05-10 14:45'}]},
+    {id:'TR-1452',date:'2026-05-11',fromLoc:'L1',toLoc:'L3',status:'Pending Approval',createdBy:'u3',
+     lines:[{itemId:'I7001',qty:30,uom:'BOX'}],
+     approvals:[{userId:'u3',role:'Stock Clerk',action:'Created',ts:'2026-05-11 09:15',note:'Urgent - branch low on stock'}]}
+  ],
+
+  // Goods Requests (from departments)
+  requests: [
+    {id:'GR-340',date:'2026-05-10',requestor:'u2',location:'L2',status:'Pending Approval',
+     lines:[{itemId:'I2001',qty:30,uom:'PACK',note:'For branch use'},{itemId:'I5001',qty:5,uom:'BTL'}],
+     approvals:[{userId:'u2',role:'Warehouse Supervisor',action:'Submitted',ts:'2026-05-10 10:30'}]},
+    {id:'GR-341',date:'2026-05-11',requestor:'u3',location:'L3',status:'Approved',
+     lines:[{itemId:'I3001',qty:200,uom:'BTL'},{itemId:'I3002',qty:100,uom:'PCS'}],
+     approvals:[{userId:'u3',role:'Stock Clerk',action:'Submitted',ts:'2026-05-11 08:00'},
+                {userId:'u1',role:'Inventory Manager',action:'Approved',ts:'2026-05-11 09:30',note:'Transfer initiated'}]}
+  ],
+
+  // Adjustments
+  adjustments: [
+    {id:'ADJ-220',date:'2026-05-07',location:'L1',reasonCode:'CNT',createdBy:'u2',status:'Posted',
+     lines:[{itemId:'I8002',systemQty:2856,countQty:2840,variance:-16,unitCost:6.5,value:-104}],
+     totalValue:-104,
+     approvals:[{userId:'u2',role:'Warehouse Supervisor',action:'Created',ts:'2026-05-07 16:00'},
+                {userId:'u1',role:'Inventory Manager',action:'Approved',ts:'2026-05-07 16:45'}]},
+    {id:'ADJ-221',date:'2026-05-09',location:'L4',reasonCode:'DMG',createdBy:'u3',status:'Pending Approval',
+     lines:[{itemId:'I4001',systemQty:200,countQty:185,variance:-15,unitCost:172,value:-2580}],
+     totalValue:-2580,
+     approvals:[{userId:'u3',role:'Stock Clerk',action:'Created',ts:'2026-05-09 11:20',note:'Freezer breakdown 4 hours - thawed batch'}]},
+    {id:'ADJ-222',date:'2026-05-10',location:'L2',reasonCode:'EXP',createdBy:'u2',status:'Pending Approval L2',
+     lines:[{itemId:'I7001',systemQty:38,countQty:0,variance:-38,unitCost:42,value:-1596},
+            {itemId:'I3002',systemQty:50,countQty:0,variance:-50,unitCost:7.5,value:-375}],
+     totalValue:-1971,
+     approvals:[{userId:'u2',role:'Warehouse Supervisor',action:'Created',ts:'2026-05-10 09:00',note:'Expired stock - to dispose'},
+                {userId:'u1',role:'Inventory Manager',action:'Approved L1',ts:'2026-05-10 10:30'}]}
+  ],
+
+  // Vendor Bills (for matching)
+  vendorBills: [
+    {id:'BILL-DELL-7720',vendor:'V1',date:'2026-05-09',amount:273750,grnRef:'GRN-2620',status:'Matched',discrepancy:0},
+    {id:'BILL-AQUA-4501',vendor:'V4',date:'2026-05-09',amount:12135,grnRef:'GRN-2621',status:'Matched',discrepancy:0},
+    {id:'BILL-BOS-3344',vendor:'V8',date:'2026-05-10',amount:17140,grnRef:'GRN-2622',status:'Discrepancy',discrepancy:2980}
+  ],
+
+  // Cost absorption rules
+  costRules: [
+    {id:'CR1',name:'Default Freight & Duty',method:'value',applies:'All',freight:true,duty:true,insurance:true,active:true},
+    {id:'CR2',name:'F&B Cold Chain',method:'weight',applies:'Categories: F&B - Beverages, F&B - Food',freight:true,duty:false,insurance:true,active:true},
+    {id:'CR3',name:'Resort Direct Delivery',method:'qty',applies:'Location: Resort Supply Hub',freight:true,duty:false,insurance:false,active:true}
+  ],
+
+  // Item bundles
+  bundles: [
+    {id:'BUN-001',code:'WELCOME-PKG',name:'Resort Welcome Package',price:850,components:[
+      {itemId:'I3001',qty:2},{itemId:'I8001',qty:1},{itemId:'I8002',qty:2}
+    ]},
+    {id:'BUN-002',code:'CLEAN-KIT',name:'Housekeeping Daily Kit',price:520,components:[
+      {itemId:'I5001',qty:1},{itemId:'I8002',qty:6}
+    ]}
+  ],
+
+  // Alerts/notifications
+  alerts: [
+    {id:'A1',type:'low_stock',severity:'high',title:'Out of stock: Frozen Chicken Breast at Male Warehouse',ts:'2026-05-11 08:00',read:false},
+    {id:'A2',type:'expiry',severity:'high',title:'8 units of Paracetamol expire in 30 days at Hulhumale',ts:'2026-05-11 07:30',read:false},
+    {id:'A3',type:'approval',severity:'medium',title:'GRN-2622 awaiting your approval (Floor Cleaner with bill discrepancy)',ts:'2026-05-10 11:25',read:false},
+    {id:'A4',type:'approval',severity:'medium',title:'Adjustment ADJ-222 needs L2 approval (Expired stock write-off)',ts:'2026-05-10 10:32',read:false},
+    {id:'A5',type:'discrepancy',severity:'high',title:'Bill BILL-BOS-3344 has Rf 2,980 variance vs PO',ts:'2026-05-10 11:30',read:false}
+  ]
+};
+
+
+/* ═══════════════════════════════════════════════════════
+   HISTORICAL DATA — for AI reorder suggestions
+   In a real system this would come from sales/issues over
+   the past N months. Demo data simulates it.
+   ═══════════════════════════════════════════════════════ */
+
+// Monthly consumption data per item (last 6 months) - units consumed
+STATE.consumption = {
+  'I1001':[8,12,10,15,11,14],   // laptops - steady growth
+  'I1002':[6,7,9,8,10,9],
+  'I2001':[180,210,195,240,260,275],   // paper - high volume, growing
+  'I3001':[2800,3100,2950,3400,3600,3800],   // water - very high volume
+  'I3002':[1800,2000,1950,2200,2400,2300],
+  'I4001':[120,145,160,150,180,195],   // chicken - growing demand
+  'I5001':[55,62,58,70,75,80],
+  'I6001':[12,15,11,18,16,14],
+  'I7001':[85,90,88,95,110,105],
+  'I8001':[140,165,150,180,210,220],   // towels
+  'I8002':[1800,2100,1950,2400,2600,2750]
+};
+
+// Vendor lead times (days from PO to GRN) - tracked per vendor-item
+STATE.leadTimes = {
+  // Each entry: [PO date, GRN date] - we calc avg lead time
+  'V1':{avgDays:14,history:[12,14,16,13,15,14]},   // Tech Distributors - imports
+  'V2':{avgDays:18,history:[16,20,18,19,17]},
+  'V3':{avgDays:5,history:[4,5,6,5,5]},   // Office Mart - local
+  'V4':{avgDays:3,history:[2,3,3,4,3]},   // Aqua - local & fast
+  'V5':{avgDays:2,history:[2,2,3,2,2]},   // Coke - very fast
+  'V6':{avgDays:21,history:[18,22,24,20,21]},   // Cold chain imports
+  'V7':{avgDays:7,history:[6,8,7,7,7]},
+  'V8':{avgDays:10,history:[9,11,10,10,10]},
+  'V9':{avgDays:12,history:[10,14,12,12]},
+  'V10':{avgDays:9,history:[8,10,9,10,8]},
+  'V11':{avgDays:14,history:[12,15,14,13,16]},
+  'V12':{avgDays:28,history:[25,30,28,29,28]}   // Linens - long import
+};
+
+// Map item to primary vendor
+STATE.itemPrimaryVendor = {
+  'I1001':'V1','I1002':'V1','I2001':'V3','I3001':'V4','I3002':'V5',
+  'I4001':'V6','I5001':'V8','I6001':'V9','I7001':'V10','I8001':'V12','I8002':'V12'
+};
+
+/* ═══════════════════════════════════════════════════════
+   AI REORDER ENGINE
+   Calculates: avg daily consumption, lead time demand,
+   safety stock, reorder point, suggested order qty.
+   Uses simple stats — for production add ML/seasonality.
+   ═══════════════════════════════════════════════════════ */
+
+function calcReorderSuggestion(itemId){
+  const item = STATE.items.find(i=>i.id===itemId);
+  if(!item) return null;
+  const consumption = STATE.consumption[itemId];
+  if(!consumption) return null;
+
+  // Avg monthly demand
+  const avgMonthly = consumption.reduce((a,b)=>a+b,0)/consumption.length;
+  const avgDaily = avgMonthly/30;
+
+  // Trend - compare last 3 months vs prev 3 months
+  const recent3 = consumption.slice(-3).reduce((a,b)=>a+b,0)/3;
+  const prev3 = consumption.slice(0,3).reduce((a,b)=>a+b,0)/3;
+  const trendPct = prev3>0 ? ((recent3-prev3)/prev3)*100 : 0;
+
+  // Std dev for safety stock
+  const variance = consumption.reduce((s,x)=>s+Math.pow(x-avgMonthly,2),0)/consumption.length;
+  const stdDev = Math.sqrt(variance);
+  const stdDevDaily = stdDev/30;
+
+  // Lead time from primary vendor
+  const vendorId = STATE.itemPrimaryVendor[itemId];
+  const vendor = STATE.vendors.find(v=>v.id===vendorId);
+  const leadTime = STATE.leadTimes[vendorId];
+  const leadDays = leadTime ? leadTime.avgDays : 7;
+  const leadVariability = leadTime ? Math.max(...leadTime.history)-Math.min(...leadTime.history) : 3;
+
+  // Lead time demand = avg daily * lead days
+  const leadTimeDemand = avgDaily * leadDays;
+
+  // Safety stock - service level 95% (z=1.65)
+  // SS = z * sqrt(LT*stdDev^2 + AvgDemand^2 * LTvariance^2)
+  const z = 1.65;
+  const safetyStock = z * Math.sqrt(leadDays*stdDevDaily*stdDevDaily + avgDaily*avgDaily*Math.pow(leadVariability/2,2));
+
+  // Reorder point
+  const reorderPoint = Math.ceil(leadTimeDemand + safetyStock);
+
+  // Economic order qty (simplified - 1 month supply or to max)
+  const eoq = Math.max(item.reorderQty, Math.ceil(avgMonthly));
+
+  // Current stock total
+  const currentStock = totalStock(itemId);
+  const daysOfCover = avgDaily>0 ? currentStock/avgDaily : 999;
+
+  // Urgency
+  let urgency = 'ok';
+  let urgencyReason = '';
+  if(currentStock <= reorderPoint){
+    urgency = currentStock <= safetyStock ? 'critical' : 'reorder';
+    urgencyReason = currentStock===0 ? 'OUT OF STOCK' :
+                    currentStock<=safetyStock ? `Below safety stock (${Math.ceil(safetyStock)})` :
+                    `At/below reorder point (${reorderPoint})`;
+  } else if(daysOfCover < leadDays*1.5){
+    urgency = 'watch';
+    urgencyReason = `Only ${daysOfCover.toFixed(0)} days cover, lead time ${leadDays}d`;
+  }
+
+  return {
+    itemId,item,avgMonthly,avgDaily,trendPct,stdDev,vendor,leadDays,leadVariability,
+    leadTimeDemand:Math.ceil(leadTimeDemand),safetyStock:Math.ceil(safetyStock),
+    reorderPoint,eoq,currentStock,daysOfCover,urgency,urgencyReason
+  };
 }
 
-function addRow(){
-
-let row = document.createElement("tr");
-
-row.innerHTML = `
-<td></td>
-<td><input type="text" class="item"></td>
-<td><input type="text" class="code"></td>
-<td><input type="text" class="barcode"></td>
-`;
-
-tbody.appendChild(row);
-
-updateNumbers();
-
+function getAllReorderSuggestions(){
+  return STATE.items
+    .map(i=>calcReorderSuggestion(i.id))
+    .filter(s=>s && s.urgency!=='ok')
+    .sort((a,b)=>{
+      const order={critical:0,reorder:1,watch:2};
+      return order[a.urgency]-order[b.urgency];
+    });
 }
 
-function updateNumbers(){
+/* ═══════════════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════════════ */
 
-let rows = tbody.querySelectorAll("tr");
+function $(id){return document.getElementById(id)}
+function fmt(n,cur){
+  cur = cur || STATE.currentCurrency;
+  const c = STATE.currencies.find(x=>x.code===cur);
+  if(!c) return n;
+  const v = cur==='MVR' ? n : n/c.rate;
+  return c.symbol+' '+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmtN(n,d){d=d===undefined?0:d; return Number(n).toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d})}
+function uid(prefix){return prefix+'-'+Math.random().toString(36).substr(2,5).toUpperCase()}
+function now(){
+  const d=new Date(2026,4,11,new Date().getHours(),new Date().getMinutes());
+  return d.toISOString().slice(0,16).replace('T',' ');
+}
+function today(){return '2026-05-11'}
+function daysFrom(dateStr){
+  const today=new Date(2026,4,11);
+  const d=new Date(dateStr);
+  return Math.floor((d-today)/(1000*60*60*24));
+}
+function totalStock(itemId){
+  const s = STATE.stock[itemId] || {};
+  if(STATE.currentLocation==='all') return Object.values(s).reduce((a,b)=>a+b,0);
+  return s[STATE.currentLocation]||0;
+}
+function stockStatus(itemId){
+  const item = STATE.items.find(i=>i.id===itemId);
+  const total = totalStock(itemId);
+  if(total===0) return {label:'Out',cls:'b-bad'};
+  if(total<=item.minStock) return {label:'Low',cls:'b-warn'};
+  if(total>=item.maxStock) return {label:'Over',cls:'b-orange'};
+  return {label:'OK',cls:'b-ok'};
+}
+function getUser(id){return STATE.users.find(u=>u.id===id)}
+function getItem(id){return STATE.items.find(i=>i.id===id)}
+function getLocation(id){return STATE.locations.find(l=>l.id===id)}
+function getAccount(code){return STATE.accounts.find(a=>a.code===code)}
+function getVendor(id){return STATE.vendors.find(v=>v.id===id)}
+function getCategory(id){return STATE.categories.find(c=>c.id===id)}
+function can(perm){
+  const u = STATE.currentUser;
+  if(!u) return false;
+  if(u.permissions.includes('*')) return true;
+  return u.permissions.includes(perm);
+}
+function escHtml(s){
+  if(s===null||s===undefined) return '';
+  return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
 
-rows.forEach((r,index)=>{
+/* ═══════════════════════════════════════════════════════
+   APPROVAL ENGINE
+   ═══════════════════════════════════════════════════════ */
 
-r.cells[0].innerText = index + 1;
+function getRequiredApprovals(docType, doc){
+  const rules = STATE.approvalRules.filter(r=>r.doc===docType);
+  let matched = null;
+  for(const r of rules){
+    if(r.condition==='always'){matched=r;break}
+    if(r.condition.includes('value<') && doc.totalValue!==undefined){
+      const v = Math.abs(doc.totalValue);
+      const m = r.condition.match(/value<(\d+)/);
+      if(m && v<parseInt(m[1])){matched=r;break}
+    }
+    if(r.condition.includes('value>=') && r.condition.includes('AND') && doc.totalValue!==undefined){
+      const v = Math.abs(doc.totalValue);
+      const m = r.condition.match(/value>=(\d+) AND value<(\d+)/);
+      if(m && v>=parseInt(m[1]) && v<parseInt(m[2])){matched=r;break}
+    }
+    if(r.condition.startsWith('value>=') && !r.condition.includes('AND') && doc.totalValue!==undefined){
+      const v = Math.abs(doc.totalValue);
+      const m = r.condition.match(/value>=(\d+)/);
+      if(m && v>=parseInt(m[1])){matched=r;break}
+    }
+    if(r.condition.startsWith('value>') && doc.totalValue!==undefined){
+      const v = Math.abs(doc.totalValue);
+      const m = r.condition.match(/value>(\d+)/);
+      if(m && v>parseInt(m[1])){matched=r;break}
+    }
+    if(r.condition.startsWith('discrepancy>') && doc.discrepancyPct!==undefined){
+      const m = r.condition.match(/discrepancy>(\d+)/);
+      if(m && doc.discrepancyPct>parseInt(m[1])){matched=r;break}
+    }
+  }
+  return matched || {levels:1,roles:['Inventory Manager']};
+}
 
+function canApprove(docType, doc){
+  if(!STATE.currentUser) return false;
+  const rule = getRequiredApprovals(docType, doc);
+  if(!rule.roles.includes(STATE.currentUser.role)) return false;
+  // Check current approval level needed
+  const approvedCount = (doc.approvals||[]).filter(a=>a.action&&a.action.startsWith('Approved')).length;
+  if(approvedCount >= rule.levels) return false;
+  // Check if current user already approved
+  const alreadyApproved = (doc.approvals||[]).some(a=>a.userId===STATE.currentUser.id && a.action&&a.action.startsWith('Approved'));
+  if(alreadyApproved) return false;
+  return true;
+}
+
+function approvalStatus(docType, doc){
+  const rule = getRequiredApprovals(docType, doc);
+  const approvedCount = (doc.approvals||[]).filter(a=>a.action && a.action.startsWith('Approved')).length;
+  const rejected = (doc.approvals||[]).some(a=>a.action==='Rejected');
+  if(rejected) return {state:'rejected',msg:'Rejected'};
+  if(approvedCount >= rule.levels) return {state:'approved',msg:'Fully Approved',rule};
+  return {state:'pending',msg:`Awaiting L${approvedCount+1} of ${rule.levels} (${rule.roles[approvedCount]||rule.roles[0]})`,rule,nextLevel:approvedCount+1};
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   LOGIN & USER SWITCHING
+   ═══════════════════════════════════════════════════════ */
+
+function renderLogin(){
+  const html = STATE.users.map(u=>`
+    <button class="demo-u" onclick="login('${u.id}')">
+      <div class="demo-u-av" style="background:linear-gradient(135deg,${u.color},${u.color}cc)">${u.avatar}</div>
+      <div class="demo-u-info">
+        <div class="demo-u-name">${escHtml(u.name)}</div>
+        <div class="demo-u-role">${escHtml(u.role)} • Approval Level ${u.approvalLevel===99?'∞':u.approvalLevel}</div>
+      </div>
+      <div style="font-size:18px;color:var(--t3)">→</div>
+    </button>
+  `).join('');
+  $('demoUsers').innerHTML = html;
+}
+
+function login(userId){
+  const u = STATE.users.find(x=>x.id===userId);
+  if(!u) return;
+  STATE.currentUser = u;
+  $('login').style.display = 'none';
+  $('app').style.display = 'block';
+  $('aiFab').style.display = 'flex';
+  $('userAv').textContent = u.avatar;
+  $('userAv').style.background = `linear-gradient(135deg,${u.color},${u.color}cc)`;
+  $('userName').textContent = u.name;
+  $('userRole').textContent = u.role;
+  STATE.currentPage = 'dashboard';
+  renderSidebar();
+  render();
+  updateAlertCount();
+}
+
+function logout(){
+  STATE.currentUser = null;
+  $('app').style.display = 'none';
+  $('aiFab').style.display = 'none';
+  $('aiPanel').style.display = 'none';
+  $('login').style.display = 'flex';
+  closeAllPopups();
+}
+
+function switchUser(){
+  closeAllPopups();
+  logout();
+}
+
+/* ═══════════════════════════════════════════════════════
+   POPUPS (Location, Currency, User Menu)
+   ═══════════════════════════════════════════════════════ */
+
+function closeAllPopups(){$('popups').innerHTML=''}
+
+function toggleLocSwitch(e){
+  e.stopPropagation();
+  if($('popups').innerHTML.includes('loc-pop')){closeAllPopups();return}
+  closeAllPopups();
+  const rect = e.currentTarget.getBoundingClientRect();
+  const allItem = `<div class="pop-item ${STATE.currentLocation==='all'?'active':''}" onclick="setLocation('all')">
+    <span>🌐</span><span>All Locations</span>${STATE.currentLocation==='all'?'<span class="sub">✓</span>':''}</div>`;
+  const items = STATE.locations.map(l=>`
+    <div class="pop-item ${STATE.currentLocation===l.id?'active':''}" onclick="setLocation('${l.id}')">
+      <span>📍</span><span>${escHtml(l.name)}</span>${STATE.currentLocation===l.id?'<span class="sub">✓</span>':`<span class="sub">${l.code}</span>`}
+    </div>`).join('');
+  $('popups').innerHTML = `<div class="pop loc-pop" style="top:55px;right:${window.innerWidth-rect.right}px">${allItem}${items}</div>`;
+}
+
+function setLocation(id){
+  STATE.currentLocation = id;
+  $('curLocName').textContent = id==='all'?'All Locations':getLocation(id).name;
+  closeAllPopups();
+  render();
+  toast('Location: '+(id==='all'?'All':getLocation(id).name),'ok');
+}
+
+function toggleCurSwitch(e){
+  e.stopPropagation();
+  if($('popups').innerHTML.includes('cur-pop')){closeAllPopups();return}
+  closeAllPopups();
+  const rect = e.currentTarget.getBoundingClientRect();
+  const items = STATE.currencies.map(c=>`
+    <div class="pop-item ${STATE.currentCurrency===c.code?'active':''}" onclick="setCurrency('${c.code}')">
+      <span style="font-weight:700">${c.code}</span><span>${escHtml(c.name)}</span>
+      ${STATE.currentCurrency===c.code?'<span class="sub">✓</span>':`<span class="sub">${c.rate.toFixed(4)}</span>`}
+    </div>`).join('');
+  $('popups').innerHTML = `<div class="pop cur-pop" style="top:55px;right:${window.innerWidth-rect.right}px">${items}</div>`;
+}
+
+function setCurrency(code){
+  STATE.currentCurrency = code;
+  $('curCurCode').textContent = code;
+  closeAllPopups();
+  render();
+}
+
+function toggleUserMenu(e){
+  e.stopPropagation();
+  if($('popups').innerHTML.includes('user-pop')){closeAllPopups();return}
+  closeAllPopups();
+  const u = STATE.currentUser;
+  $('popups').innerHTML = `
+    <div class="pop user-pop" style="top:55px;right:18px;min-width:240px">
+      <div style="padding:12px;background:var(--s2);border-bottom:1px solid var(--border)">
+        <div style="font-weight:700;font-size:13px">${escHtml(u.name)}</div>
+        <div style="font-size:11px;color:var(--t2)">${escHtml(u.email)}</div>
+        <div style="margin-top:6px;font-size:10px"><span class="bdg b-info">${escHtml(u.role)}</span></div>
+      </div>
+      <div class="pop-item" onclick="closeAllPopups();go('myApprovals')">
+        <span>✅</span><span>My Approvals</span><span class="sub">${myPendingApprovals()}</span>
+      </div>
+      <div class="pop-item" onclick="closeAllPopups();go('approvalRules')">
+        <span>⚙️</span><span>Approval Rules</span>
+      </div>
+      <div class="pop-item" onclick="switchUser()">
+        <span>🔄</span><span>Switch User</span>
+      </div>
+      <div class="pop-item" onclick="logout()">
+        <span>🚪</span><span>Sign Out</span>
+      </div>
+    </div>
+  `;
+}
+
+function myPendingApprovals(){
+  if(!STATE.currentUser) return 0;
+  let n = 0;
+  // Adjustments
+  STATE.adjustments.forEach(a=>{
+    if(a.status.startsWith('Pending') && canApprove('Adjustment',a)) n++;
+  });
+  STATE.grns.forEach(g=>{
+    if(g.status==='Pending Approval' && canApprove('GRN',{totalValue:grnTotal(g)})) n++;
+  });
+  STATE.transfers.forEach(t=>{
+    if(t.status==='Pending Approval' && canApprove('Transfer',t)) n++;
+  });
+  STATE.requests.forEach(r=>{
+    if(r.status==='Pending Approval' && canApprove('Goods Request',r)) n++;
+  });
+  return n;
+}
+
+document.addEventListener('click',()=>closeAllPopups());
+
+
+/* ═══════════════════════════════════════════════════════
+   SIDEBAR & ROUTING
+   ═══════════════════════════════════════════════════════ */
+
+const NAV = [
+  {sec:'OVERVIEW',items:[
+    {id:'dashboard',icon:'📊',label:'Dashboard'},
+    {id:'alerts',icon:'🔔',label:'Alerts',badge:'alertCount'},
+    {id:'reorder',icon:'🤖',label:'AI Reorder',badge:'reorderCount',badgeWarn:true},
+    {id:'myApprovals',icon:'✅',label:'My Approvals',badge:'apprCount',badgeWarn:true}
+  ]},
+  {sec:'CATALOG',items:[
+    {id:'items',icon:'📦',label:'Items'},
+    {id:'categories',icon:'📂',label:'Categories'},
+    {id:'uoms',icon:'⚖️',label:'Units of Measure'},
+    {id:'bundles',icon:'🎁',label:'Bundles & Kits'},
+    {id:'labels',icon:'🏷️',label:'Label Designer'}
+  ]},
+  {sec:'STOCK OPS',items:[
+    {id:'stock',icon:'📋',label:'Stock On Hand'},
+    {id:'lots',icon:'📅',label:'Lots & Expiry'},
+    {id:'requests',icon:'📝',label:'Goods Requests'},
+    {id:'grn',icon:'📥',label:'GRN'},
+    {id:'transfers',icon:'🔄',label:'Transfers'},
+    {id:'adjustments',icon:'⚙️',label:'Adjustments'},
+    {id:'count',icon:'🔢',label:'Stock Count'}
+  ]},
+  {sec:'INTEGRATION',items:[
+    {id:'bills',icon:'🧾',label:'Vendor Bill Match'},
+    {id:'accounts',icon:'💼',label:'GL Accounts'},
+    {id:'costing',icon:'💰',label:'Costing Methods'},
+    {id:'costRules',icon:'📐',label:'Cost Absorption'}
+  ]},
+  {sec:'SETUP',items:[
+    {id:'locations',icon:'📍',label:'Locations'},
+    {id:'currencies',icon:'💱',label:'Currencies'},
+    {id:'reasonCodes',icon:'📑',label:'Reason Codes'},
+    {id:'approvalRules',icon:'🔒',label:'Approval Rules'},
+    {id:'users',icon:'👥',label:'Users & Roles'},
+    {id:'reports',icon:'📈',label:'Reports'}
+  ]}
+];
+
+function renderSidebar(){
+  const html = NAV.map(sec=>{
+    const items = sec.items.map(it=>{
+      let badge = '';
+      if(it.badge==='alertCount'){
+        const n = STATE.alerts.filter(a=>!a.read).length;
+        if(n>0) badge = `<span class="ct-badge ${it.badgeWarn?'warn':''}">${n}</span>`;
+      } else if(it.badge==='reorderCount'){
+        const n = getAllReorderSuggestions().length;
+        if(n>0) badge = `<span class="ct-badge ${it.badgeWarn?'warn':''}">${n}</span>`;
+      } else if(it.badge==='apprCount'){
+        const n = myPendingApprovals();
+        if(n>0) badge = `<span class="ct-badge ${it.badgeWarn?'warn':''}">${n}</span>`;
+      }
+      return `<div class="ni ${STATE.currentPage===it.id?'active':''}" onclick="go('${it.id}')">
+        <span class="ic">${it.icon}</span><span>${it.label}</span>${badge}</div>`;
+    }).join('');
+    return `<div class="nav-sec">${sec.sec}</div>${items}`;
+  }).join('');
+  $('sidebar').innerHTML = html;
+}
+
+function go(page){
+  STATE.currentPage = page;
+  renderSidebar();
+  render();
+  $('main').scrollTop = 0;
+}
+
+function render(){
+  const r = {
+    dashboard:renderDashboard, alerts:renderAlerts, reorder:renderReorder,
+    myApprovals:renderMyApprovals, items:renderItems, categories:renderCategories,
+    uoms:renderUOMs, bundles:renderBundles, labels:renderLabels,
+    stock:renderStock, lots:renderLots, requests:renderRequests,
+    grn:renderGRN, transfers:renderTransfers, adjustments:renderAdjustments,
+    count:renderCount, bills:renderBills, accounts:renderAccounts,
+    costing:renderCosting, costRules:renderCostRules, locations:renderLocations,
+    currencies:renderCurrencies, reasonCodes:renderReasonCodes,
+    approvalRules:renderApprovalRules, users:renderUsers, reports:renderReports
+  };
+  (r[STATE.currentPage] || renderDashboard)();
+}
+
+function updateAlertCount(){
+  const n = STATE.alerts.filter(a=>!a.read).length;
+  $('alertCount').textContent = n;
+  $('alertCount').style.display = n>0?'flex':'none';
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOAST & MODAL
+   ═══════════════════════════════════════════════════════ */
+
+function toast(msg, type){
+  const t = document.createElement('div');
+  t.className = 'toast '+(type||'');
+  t.textContent = msg;
+  $('toasts').appendChild(t);
+  setTimeout(()=>t.remove(), 3200);
+}
+
+function modal(html, size){
+  const sizeCls = size||'';
+  $('modals').innerHTML = `<div class="mb" onclick="if(event.target===this)closeModal()"><div class="md ${sizeCls}">${html}</div></div>`;
+}
+
+function closeModal(){$('modals').innerHTML=''}
+
+/* ═══════════════════════════════════════════════════════
+   APPROVAL ACTIONS
+   ═══════════════════════════════════════════════════════ */
+
+function approveDoc(docType, docId){
+  const note = prompt('Approval note (optional):','') || '';
+  let doc, statusField='status';
+  if(docType==='Adjustment') doc = STATE.adjustments.find(d=>d.id===docId);
+  else if(docType==='GRN') doc = STATE.grns.find(d=>d.id===docId);
+  else if(docType==='Transfer') doc = STATE.transfers.find(d=>d.id===docId);
+  else if(docType==='Goods Request') doc = STATE.requests.find(d=>d.id===docId);
+  if(!doc){toast('Document not found','err');return}
+
+  // Build approval doc-context for canApprove
+  let ctx = doc;
+  if(docType==='GRN') ctx = {totalValue:grnTotal(doc)};
+  if(docType==='Vendor Bill') ctx = {discrepancyPct:doc.discrepancy?doc.discrepancy/doc.amount*100:0};
+
+  if(!canApprove(docType, ctx)){toast('You are not authorized to approve this','err');return}
+
+  const rule = getRequiredApprovals(docType, ctx);
+  const currentLevel = (doc.approvals||[]).filter(a=>a.action&&a.action.startsWith('Approved')).length + 1;
+
+  doc.approvals = doc.approvals || [];
+  doc.approvals.push({
+    userId:STATE.currentUser.id,
+    role:STATE.currentUser.role,
+    action: rule.levels===1 ? 'Approved' : `Approved L${currentLevel}`,
+    ts: now(),
+    note
+  });
+
+  // Update status
+  if(currentLevel >= rule.levels){
+    if(docType==='Adjustment'){
+      doc.status='Posted';
+      postAdjustmentToStock(doc);
+    } else if(docType==='GRN'){
+      doc.status='Posted';
+      postGrnToStock(doc);
+    } else if(docType==='Transfer'){
+      doc.status='In Transit';
+    } else if(docType==='Goods Request'){
+      doc.status='Approved';
+    }
+  } else {
+    doc.status = `Pending Approval L${currentLevel+1}`;
+  }
+  toast(`${docType} ${docId} approved`,'ok');
+  closeModal();
+  render();
+  renderSidebar();
+}
+
+function rejectDoc(docType, docId){
+  const note = prompt('Rejection reason (required):','');
+  if(!note){toast('Rejection reason required','err');return}
+  let doc;
+  if(docType==='Adjustment') doc = STATE.adjustments.find(d=>d.id===docId);
+  else if(docType==='GRN') doc = STATE.grns.find(d=>d.id===docId);
+  else if(docType==='Transfer') doc = STATE.transfers.find(d=>d.id===docId);
+  else if(docType==='Goods Request') doc = STATE.requests.find(d=>d.id===docId);
+  if(!doc){toast('Document not found','err');return}
+  doc.approvals = doc.approvals || [];
+  doc.approvals.push({userId:STATE.currentUser.id,role:STATE.currentUser.role,action:'Rejected',ts:now(),note});
+  doc.status = 'Rejected';
+  toast(`${docType} ${docId} rejected`,'warn');
+  closeModal();
+  render();
+  renderSidebar();
+}
+
+function postAdjustmentToStock(adj){
+  adj.lines.forEach(line=>{
+    if(!STATE.stock[line.itemId]) STATE.stock[line.itemId]={};
+    if(!STATE.stock[line.itemId][adj.location]) STATE.stock[line.itemId][adj.location]=0;
+    STATE.stock[line.itemId][adj.location] += line.variance;
+  });
+}
+
+function postGrnToStock(grn){
+  grn.lines.forEach(line=>{
+    if(!STATE.stock[line.itemId]) STATE.stock[line.itemId]={};
+    if(!STATE.stock[line.itemId][grn.location]) STATE.stock[line.itemId][grn.location]=0;
+    STATE.stock[line.itemId][grn.location] += line.recvQty;
+  });
+}
+
+function grnTotal(grn){
+  return grn.lines.reduce((s,l)=>s+(l.lineTotal||l.recvQty*l.unitCost),0) + (grn.freight||0)+(grn.duty||0)+(grn.insurance||0);
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   DASHBOARD
+   ═══════════════════════════════════════════════════════ */
+
+function renderDashboard(){
+  const totalItems = STATE.items.length;
+  const totalValue = STATE.items.reduce((s,i)=>s+(totalStock(i.id)*i.avgCost),0);
+  const lowStock = STATE.items.filter(i=>{const t=totalStock(i.id);return t>0&&t<=i.minStock}).length;
+  const outOfStock = STATE.items.filter(i=>totalStock(i.id)===0).length;
+  const pendingGrns = STATE.grns.filter(g=>g.status.includes('Pending')).length;
+  const pendingTransfers = STATE.transfers.filter(t=>t.status.includes('Pending')||t.status==='In Transit').length;
+  const reorderNeeded = getAllReorderSuggestions().length;
+  const expiringIn30 = STATE.lots.filter(l=>{const d=daysFrom(l.expDate);return d>=0&&d<=30}).length;
+  const myAppr = myPendingApprovals();
+
+  $('main').innerHTML = `
+    <div class="ph">
+      <div>
+        <div class="pt">Dashboard</div>
+        <div class="ps">Welcome back, ${escHtml(STATE.currentUser.name.split(' ')[0])} · ${STATE.currentLocation==='all'?'All locations':getLocation(STATE.currentLocation).name}</div>
+      </div>
+      <div class="brow">
+        <button class="btn" onclick="go('reports')">📊 Reports</button>
+        <button class="btn btn-p" onclick="openItemForm()">+ New Item</button>
+      </div>
+    </div>
+
+    ${reorderNeeded>0?`<div class="alert-banner">
+      <div class="ic">🤖</div>
+      <div style="flex:1">
+        <h4>AI Reorder Engine — ${reorderNeeded} item${reorderNeeded>1?'s':''} need attention</h4>
+        <p>Based on past 6 months of consumption, vendor lead times, and demand variability. Click to review suggestions and create POs.</p>
+      </div>
+      <button class="btn" style="background:#fff;color:var(--purple)" onclick="go('reorder')">View Suggestions →</button>
+    </div>`:''}
+
+    <div class="g4" style="margin-bottom:18px">
+      <div class="stat">
+        <div class="stat-i">📦</div>
+        <div class="stat-l">Total Items</div>
+        <div class="stat-v">${fmtN(totalItems)}</div>
+        <div class="stat-s">Active in catalog</div>
+      </div>
+      <div class="stat">
+        <div class="stat-i">💰</div>
+        <div class="stat-l">Stock Value</div>
+        <div class="stat-v">${fmt(totalValue)}</div>
+        <div class="stat-s">At average cost</div>
+      </div>
+      <div class="stat">
+        <div class="stat-i" style="color:var(--orange)">⚠️</div>
+        <div class="stat-l">Low Stock</div>
+        <div class="stat-v" style="color:var(--orange)">${lowStock}</div>
+        <div class="stat-s">Below min level</div>
+      </div>
+      <div class="stat">
+        <div class="stat-i" style="color:var(--red)">🚫</div>
+        <div class="stat-l">Out of Stock</div>
+        <div class="stat-v" style="color:var(--red)">${outOfStock}</div>
+        <div class="stat-s">Zero on hand</div>
+      </div>
+    </div>
+
+    <div class="g4" style="margin-bottom:18px">
+      <div class="stat">
+        <div class="stat-i">📥</div>
+        <div class="stat-l">Pending GRNs</div>
+        <div class="stat-v">${pendingGrns}</div>
+        <div class="stat-s">Awaiting receipt/approval</div>
+      </div>
+      <div class="stat">
+        <div class="stat-i">🔄</div>
+        <div class="stat-l">Active Transfers</div>
+        <div class="stat-v">${pendingTransfers}</div>
+        <div class="stat-s">In transit / pending</div>
+      </div>
+      <div class="stat" style="${expiringIn30>0?'border-color:var(--amber)':''}">
+        <div class="stat-i" style="color:var(--amber)">📅</div>
+        <div class="stat-l">Expiring (30d)</div>
+        <div class="stat-v" style="color:var(--amber)">${expiringIn30}</div>
+        <div class="stat-s">Lots near expiry</div>
+      </div>
+      <div class="stat" style="${myAppr>0?'border-color:var(--blue);background:var(--blue2)':''}">
+        <div class="stat-i" style="color:var(--blue)">✅</div>
+        <div class="stat-l">My Approvals</div>
+        <div class="stat-v" style="color:var(--blue)">${myAppr}</div>
+        <div class="stat-s">${myAppr>0?'<a onclick="go(\'myApprovals\')" style="cursor:pointer;text-decoration:underline">Review now</a>':'Nothing pending'}</div>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="card">
+        <div class="card-t">Stock by Location <span style="font-weight:400;font-size:11px;color:var(--t2)">at cost</span></div>
+        ${STATE.locations.map(l=>{
+          const locValue = STATE.items.reduce((s,i)=>s+((STATE.stock[i.id]||{})[l.id]||0)*i.avgCost,0);
+          const pct = totalValue>0 ? (locValue/totalValue)*100 : 0;
+          return `<div style="margin-bottom:13px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+              <span><strong>${escHtml(l.name)}</strong> <span class="muted-s">${l.code}</span></span>
+              <span class="mono">${fmt(locValue)} <span class="muted-s">(${pct.toFixed(1)}%)</span></span>
+            </div>
+            <div class="bar"><div class="bar-fill" style="width:${pct}%"></div></div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <div class="card">
+        <div class="card-t">Top 5 Items by Value</div>
+        <table class="tbl">
+          <thead><tr><th>Item</th><th class="txt-r">Stock</th><th class="txt-r">Value</th></tr></thead>
+          <tbody>
+            ${STATE.items.map(i=>({i,v:totalStock(i.id)*i.avgCost})).sort((a,b)=>b.v-a.v).slice(0,5).map(({i,v})=>`
+              <tr style="cursor:pointer" onclick="openItem('${i.id}')">
+                <td><div style="font-weight:600">${escHtml(i.name)}</div><div class="muted-s mono">${i.sku}</div></td>
+                <td class="txt-r mono">${fmtN(totalStock(i.id))}</td>
+                <td class="txt-r mono">${fmt(v)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-t">Recent Activity</div>
+      <table class="tbl">
+        <thead><tr><th>Type</th><th>Ref</th><th>Date</th><th>User</th><th>Status</th></tr></thead>
+        <tbody>
+          ${[
+            ...STATE.grns.slice(-4).map(g=>({type:'GRN',ref:g.id,date:g.date,user:g.createdBy,status:g.status,cat:'b-info'})),
+            ...STATE.transfers.slice(-3).map(t=>({type:'Transfer',ref:t.id,date:t.date,user:t.createdBy,status:t.status,cat:'b-teal'})),
+            ...STATE.adjustments.slice(-3).map(a=>({type:'Adjustment',ref:a.id,date:a.date,user:a.createdBy,status:a.status,cat:'b-orange'}))
+          ].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8).map(x=>`
+            <tr>
+              <td><span class="bdg ${x.cat}">${x.type}</span></td>
+              <td class="mono">${x.ref}</td>
+              <td>${x.date}</td>
+              <td>${escHtml((getUser(x.user)||{name:'—'}).name)}</td>
+              <td><span class="bdg ${statusBadge(x.status)}">${x.status}</span></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function statusBadge(s){
+  if(s==='Posted'||s==='Approved'||s==='Matched') return 'b-ok';
+  if(s==='Draft') return 'b-draft';
+  if(s==='In Transit') return 'b-info';
+  if(s==='Rejected') return 'b-bad';
+  if(s.includes('Pending')) return 'b-warn';
+  if(s==='Discrepancy') return 'b-bad';
+  return 'b-draft';
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   AI REORDER PAGE
+   ═══════════════════════════════════════════════════════ */
+
+function renderReorder(){
+  const suggestions = STATE.items.map(i=>calcReorderSuggestion(i.id)).filter(s=>s);
+  const critical = suggestions.filter(s=>s.urgency==='critical');
+  const reorder = suggestions.filter(s=>s.urgency==='reorder');
+  const watch = suggestions.filter(s=>s.urgency==='watch');
+  const ok = suggestions.filter(s=>s.urgency==='ok');
+
+  $('main').innerHTML = `
+    <div class="ph">
+      <div>
+        <div class="pt">🤖 AI Reorder Suggestions</div>
+        <div class="ps">Smart reorder recommendations based on 6-month consumption + vendor lead times + demand variability</div>
+      </div>
+      <div class="brow">
+        <button class="btn" onclick="renderReorder()">🔄 Recalculate</button>
+        <button class="btn btn-p" onclick="createBulkReorderPOs()">📤 Create POs for All</button>
+      </div>
+    </div>
+
+    <div class="alert-banner">
+      <div class="ic">💡</div>
+      <div style="flex:1">
+        <h4>How this works</h4>
+        <p>
+          <strong>Avg Daily Use</strong> from 6 months of consumption history ·
+          <strong>Lead Time</strong> calculated from PO→GRN gap per vendor ·
+          <strong>Safety Stock</strong> using 95% service level (z=1.65) accounting for demand + lead-time variability ·
+          <strong>Reorder Point</strong> = lead-time demand + safety stock
+        </p>
+      </div>
+    </div>
+
+    <div class="g4" style="margin-bottom:18px">
+      <div class="stat" style="border-color:var(--red);background:var(--red2)">
+        <div class="stat-i" style="color:var(--red)">🚨</div>
+        <div class="stat-l" style="color:var(--red)">Critical</div>
+        <div class="stat-v" style="color:var(--red)">${critical.length}</div>
+        <div class="stat-s">Out of stock or below safety</div>
+      </div>
+      <div class="stat" style="border-color:var(--orange);background:var(--orange2)">
+        <div class="stat-i" style="color:var(--orange)">⚠️</div>
+        <div class="stat-l" style="color:var(--orange)">Reorder Now</div>
+        <div class="stat-v" style="color:var(--orange)">${reorder.length}</div>
+        <div class="stat-s">At/below reorder point</div>
+      </div>
+      <div class="stat" style="border-color:var(--amber);background:var(--amber2)">
+        <div class="stat-i" style="color:var(--amber)">👁️</div>
+        <div class="stat-l" style="color:var(--amber)">Watch</div>
+        <div class="stat-v" style="color:var(--amber)">${watch.length}</div>
+        <div class="stat-s">Low days-of-cover</div>
+      </div>
+      <div class="stat" style="border-color:var(--green);background:var(--green2)">
+        <div class="stat-i" style="color:var(--green)">✓</div>
+        <div class="stat-l" style="color:var(--green)">Healthy</div>
+        <div class="stat-v" style="color:var(--green)">${ok.length}</div>
+        <div class="stat-s">No action needed</div>
+      </div>
+    </div>
+
+    ${renderReorderTable('🚨 Critical', critical, 'var(--red)')}
+    ${renderReorderTable('⚠️ Reorder Now', reorder, 'var(--orange)')}
+    ${renderReorderTable('👁️ Watch List', watch, 'var(--amber)')}
+    ${renderReorderTable('✓ Healthy Stock', ok, 'var(--green)', true)}
+  `;
+}
+
+function renderReorderTable(title, list, color, collapsed){
+  if(!list.length) return '';
+  return `
+    <div class="card">
+      <div class="card-t" style="color:${color}">
+        ${title} <span style="background:${color};color:#fff;padding:2px 9px;border-radius:10px;font-size:11px">${list.length}</span>
+        ${collapsed?`<button class="btn btn-xs" onclick="this.parentElement.parentElement.querySelector('table').style.display=this.parentElement.parentElement.querySelector('table').style.display==='none'?'':'none'">Toggle</button>`:''}
+      </div>
+      <div style="overflow-x:auto">
+      <table class="tbl" ${collapsed?'style="display:none"':''}>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th class="txt-r">On Hand</th>
+            <th class="txt-r">Avg/Day</th>
+            <th class="txt-r">Days Cover</th>
+            <th class="txt-r">Lead Time</th>
+            <th class="txt-r">Reorder Pt</th>
+            <th class="txt-r">Suggest Qty</th>
+            <th>Trend</th>
+            <th>Vendor</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        ${list.map(s=>`
+          <tr>
+            <td>
+              <div style="font-weight:600;cursor:pointer" onclick="openItem('${s.itemId}')">${escHtml(s.item.name)}</div>
+              <div class="muted-s mono">${s.item.sku}</div>
+              ${s.urgencyReason?`<div class="muted-s" style="color:${color};margin-top:2px">⚠ ${escHtml(s.urgencyReason)}</div>`:''}
+            </td>
+            <td class="txt-r mono"><strong>${fmtN(s.currentStock)}</strong> ${s.item.uom}</td>
+            <td class="txt-r mono">${s.avgDaily.toFixed(1)}</td>
+            <td class="txt-r mono ${s.daysOfCover<7?'':'muted'}" style="${s.daysOfCover<s.leadDays?'color:var(--red);font-weight:700':''}">${s.daysOfCover>999?'∞':s.daysOfCover.toFixed(0)+'d'}</td>
+            <td class="txt-r mono">${s.leadDays}d <span class="muted-s">±${s.leadVariability}</span></td>
+            <td class="txt-r mono">${fmtN(s.reorderPoint)}</td>
+            <td class="txt-r mono"><strong style="color:var(--blue)">${fmtN(s.eoq)}</strong></td>
+            <td>
+              ${s.trendPct>5?'<span style="color:var(--red)">↑</span>':s.trendPct<-5?'<span style="color:var(--green)">↓</span>':'<span class="muted">→</span>'}
+              <span class="mono muted-s">${s.trendPct>0?'+':''}${s.trendPct.toFixed(0)}%</span>
+            </td>
+            <td class="muted-s">${s.vendor?escHtml(s.vendor.name):'<em>Not set</em>'}</td>
+            <td>
+              <button class="btn btn-xs btn-p" onclick="createPOFromReorder('${s.itemId}',${s.eoq})">Create PO</button>
+            </td>
+          </tr>
+        `).join('')}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  `;
+}
+
+function createPOFromReorder(itemId, qty){
+  const s = calcReorderSuggestion(itemId);
+  modal(`
+    <div class="mh">
+      <div><div class="mt">Create Purchase Order</div><div class="ms">From AI reorder suggestion</div></div>
+      <button class="mx" onclick="closeModal()">×</button>
+    </div>
+    <div class="mc">
+      <div class="card-flat" style="margin-bottom:14px">
+        <div style="display:flex;gap:14px;align-items:center">
+          <div style="width:50px;height:50px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-radius:10px;font-size:24px;display:flex;align-items:center;justify-content:center">🤖</div>
+          <div>
+            <div style="font-weight:700">AI Recommendation</div>
+            <div class="muted-s">Calculated from ${s.avgMonthly.toFixed(0)} avg monthly demand, ${s.leadDays}d lead time, ${s.trendPct>0?'+':''}${s.trendPct.toFixed(0)}% trend</div>
+          </div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="fld"><label class="lbl">Item</label>
+          <div style="padding:8px;background:var(--s2);border-radius:6px;font-weight:600">${escHtml(s.item.name)}</div>
+          <div class="ftext mono">${s.item.sku}</div>
+        </div>
+        <div class="fld"><label class="lbl">Vendor</label>
+          <select class="sel" id="poVendor">
+            ${s.item.vendors.map(v=>`<option ${s.vendor&&s.vendor.name===v?'selected':''}>${escHtml(v)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="fld"><label class="lbl">Quantity (suggested ${fmtN(s.eoq)})</label>
+          <input class="inp mono" id="poQty" type="number" value="${qty}">
+          <div class="ftext">Covers ~${(qty/s.avgDaily).toFixed(0)} days at current rate</div>
+        </div>
+        <div class="fld"><label class="lbl">Unit Cost</label>
+          <input class="inp mono" id="poCost" type="number" value="${s.item.lastCost}" step="0.01">
+        </div>
+        <div class="fld"><label class="lbl">Deliver to</label>
+          <select class="sel" id="poLoc">
+            ${STATE.locations.map(l=>`<option value="${l.id}">${escHtml(l.name)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="fld"><label class="lbl">Expected Delivery (${s.leadDays}d lead time)</label>
+          <input class="inp" id="poEta" type="date" value="${expectedDate(s.leadDays)}">
+        </div>
+      </div>
+      <div class="fld"><label class="lbl">Notes</label>
+        <textarea class="txa" id="poNotes">Generated from AI reorder suggestion. Trend: ${s.trendPct>0?'+':''}${s.trendPct.toFixed(0)}% (last 3 vs prev 3 months).</textarea>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-p" onclick="submitPO('${itemId}')">Create PO →</button>
+    </div>
+  `, 'lg');
+}
+
+function expectedDate(daysAhead){
+  const d=new Date(2026,4,11);
+  d.setDate(d.getDate()+daysAhead);
+  return d.toISOString().slice(0,10);
+}
+
+function submitPO(itemId){
+  const qty = parseFloat($('poQty').value);
+  const cost = parseFloat($('poCost').value);
+  const vendor = $('poVendor').value;
+  toast(`PO created: ${fmtN(qty)} units × ${fmt(cost)} = ${fmt(qty*cost)}. Sent to ${vendor}.`,'ok');
+  closeModal();
+}
+
+function createBulkReorderPOs(){
+  const n = getAllReorderSuggestions().length;
+  if(n===0){toast('No reorders needed','ok');return}
+  if(!confirm(`Create ${n} purchase orders for all reorder suggestions?`)) return;
+  toast(`✓ ${n} POs created and sent to respective vendors`,'ok');
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   ITEMS PAGE
+   ═══════════════════════════════════════════════════════ */
+
+let itemSearchTerm = '';
+let itemCatFilter = 'all';
+
+function renderItems(){
+  let items = STATE.items;
+  if(itemSearchTerm){
+    const q = itemSearchTerm.toLowerCase();
+    items = items.filter(i=>i.name.toLowerCase().includes(q)||i.sku.toLowerCase().includes(q)||i.barcodes.some(b=>b.toLowerCase().includes(q)));
+  }
+  if(itemCatFilter!=='all') items = items.filter(i=>i.category===itemCatFilter);
+
+  $('main').innerHTML = `
+    <div class="ph">
+      <div>
+        <div class="pt">Items</div>
+        <div class="ps">${items.length} of ${STATE.items.length} items</div>
+      </div>
+      <div class="brow">
+        <div class="search-bar"><input type="text" placeholder="Search name, SKU, barcode..." value="${escHtml(itemSearchTerm)}" oninput="itemSearchTerm=this.value;renderItems()"></div>
+        <select class="sel" style="width:auto" onchange="itemCatFilter=this.value;renderItems()">
+          <option value="all">All Categories</option>
+          ${STATE.categories.map(c=>`<option value="${c.id}" ${itemCatFilter===c.id?'selected':''}>${escHtml(c.name)}</option>`).join('')}
+        </select>
+        <button class="btn">📤 Export</button>
+        <button class="btn btn-p" onclick="openItemForm()">+ New Item</button>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <div style="overflow-x:auto">
+      <table class="tbl click">
+        <thead>
+          <tr>
+            <th style="width:50px"></th>
+            <th>Item Name</th>
+            <th>SKU</th>
+            <th>Category</th>
+            <th>UOM</th>
+            <th>Costing</th>
+            <th class="txt-r">Avg Cost</th>
+            <th class="txt-r">Total Stock</th>
+            <th class="txt-r">Value</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items.map(i=>{
+            const stock = totalStock(i.id);
+            const status = stockStatus(i.id);
+            const cat = getCategory(i.category);
+            return `<tr onclick="openItem('${i.id}')">
+              <td>${i.pic1 ? `<img src="${i.pic1}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid var(--border)">` : `<div style="width:36px;height:36px;border-radius:6px;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--t3)">📦</div>`}</td>
+              <td>
+                <div style="font-weight:600">${escHtml(i.name)}</div>
+                <div class="muted-s">${i.trackLot?'<span class="tag">LOT</span>':''}${i.trackExpiry?'<span class="tag">EXP</span>':''}${i.altUoms.length?`<span class="tag">${i.altUoms.length} UOMs</span>`:''}${i.barcodes.length>1?`<span class="tag">${i.barcodes.length} BARS</span>`:''}</div>
+              </td>
+              <td class="mono">${i.sku}</td>
+              <td>${cat?escHtml(cat.name):'-'}</td>
+              <td>${i.uom}</td>
+              <td><span class="bdg b-info">${i.costMethod}</span></td>
+              <td class="txt-r mono">${fmt(i.avgCost)}</td>
+              <td class="txt-r mono"><strong>${fmtN(stock)}</strong></td>
+              <td class="txt-r mono">${fmt(stock*i.avgCost)}</td>
+              <td><span class="bdg ${status.cls}">${status.label}</span></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+      </div>
+      ${items.length===0?'<div class="empty"><div class="ic">📦</div><div>No items match the filter</div></div>':''}
+    </div>
+  `;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ITEM DETAIL MODAL — with all tabs
+   ═══════════════════════════════════════════════════════ */
+
+let itemModalTab = 'overview';
+
+function openItem(itemId){
+  itemModalTab = 'overview';
+  showItemModal(itemId);
+}
+
+function showItemModal(itemId){
+  const i = getItem(itemId);
+  if(!i) return;
+  const cat = getCategory(i.category);
+  const stock = totalStock(itemId);
+  const reorder = calcReorderSuggestion(itemId);
+
+  modal(`
+    <div class="mh">
+      <div>
+        <div class="mt">${escHtml(i.name)}</div>
+        <div class="ms mono">${i.sku} · ${cat?escHtml(cat.name):''}</div>
+      </div>
+      <button class="mx" onclick="closeModal()">×</button>
+    </div>
+    <div class="mc">
+      <div class="tabs">
+        <button class="tab ${itemModalTab==='overview'?'active':''}" onclick="itemModalTab='overview';showItemModal('${itemId}')">Overview</button>
+        <button class="tab ${itemModalTab==='stock'?'active':''}" onclick="itemModalTab='stock';showItemModal('${itemId}')">Stock by Location</button>
+        <button class="tab ${itemModalTab==='lots'?'active':''}" onclick="itemModalTab='lots';showItemModal('${itemId}')">Lots</button>
+        <button class="tab ${itemModalTab==='uoms'?'active':''}" onclick="itemModalTab='uoms';showItemModal('${itemId}')">UOMs & Barcodes</button>
+        <button class="tab ${itemModalTab==='accounts'?'active':''}" onclick="itemModalTab='accounts';showItemModal('${itemId}')">📒 Accounts</button>
+        <button class="tab ${itemModalTab==='reorder'?'active':''}" onclick="itemModalTab='reorder';showItemModal('${itemId}')">🤖 AI Reorder</button>
+      </div>
+      <div id="itemTabBody">${renderItemTab(i, itemModalTab, reorder)}</div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeModal()">Close</button>
+      ${can('edit_item')?`<button class="btn btn-p" onclick="openItemForm('${itemId}')">Edit Item</button>`:''}
+    </div>
+  `, 'xl');
+}
+
+function renderItemTab(i, tab, reorder){
+  if(tab==='overview'){
+    return `
+      <div class="g3" style="gap:14px;margin-bottom:14px">
+        <div>
+          <div class="lbl">Image 1</div>
+          <div class="pic-slot" style="aspect-ratio:1;cursor:default">
+            ${i.pic1?`<img src="${i.pic1}">`:`<div class="ph-txt">📦<br>No image</div>`}
+          </div>
+        </div>
+        <div>
+          <div class="lbl">Image 2</div>
+          <div class="pic-slot" style="aspect-ratio:1;cursor:default">
+            ${i.pic2?`<img src="${i.pic2}">`:`<div class="ph-txt">📦<br>No image</div>`}
+          </div>
+        </div>
+        <div>
+          <div class="card-flat">
+            <div class="kv"><span class="k">Total Stock</span><span class="v mono">${fmtN(totalStock(i.id))} ${i.uom}</span></div>
+            <div class="kv"><span class="k">Stock Value</span><span class="v mono">${fmt(totalStock(i.id)*i.avgCost)}</span></div>
+            <div class="kv"><span class="k">Avg Cost (WAC)</span><span class="v mono">${fmt(i.avgCost)}</span></div>
+            <div class="kv"><span class="k">Last Purchase</span><span class="v mono">${fmt(i.lastCost)}</span></div>
+            <div class="kv"><span class="k">Sell Price</span><span class="v mono">${fmt(i.sellPrice)}</span></div>
+            <div class="kv"><span class="k">Margin</span><span class="v">${((i.sellPrice-i.avgCost)/i.sellPrice*100).toFixed(1)}%</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="card-flat">
+          <div class="lbl" style="margin-bottom:8px">Item Details</div>
+          <div class="kv"><span class="k">Description</span><span class="v" style="text-align:right;max-width:60%">${escHtml(i.description||'—')}</span></div>
+          <div class="kv"><span class="k">Category</span><span class="v">${escHtml((getCategory(i.category)||{name:'—'}).name)}</span></div>
+          <div class="kv"><span class="k">Costing Method</span><span class="v"><span class="bdg b-info">${i.costMethod}</span></span></div>
+          <div class="kv"><span class="k">Track Lot</span><span class="v">${i.trackLot?'✓ Yes':'No'}</span></div>
+          <div class="kv"><span class="k">Track Expiry</span><span class="v">${i.trackExpiry?'✓ Yes':'No'}</span></div>
+          <div class="kv"><span class="k">Weight</span><span class="v">${i.weight||'—'} kg</span></div>
+          <div class="kv"><span class="k">Dimensions</span><span class="v">${escHtml(i.dimensions||'—')}</span></div>
+        </div>
+        <div class="card-flat">
+          <div class="lbl" style="margin-bottom:8px">Reorder Settings</div>
+          <div class="kv"><span class="k">Min Stock</span><span class="v mono">${fmtN(i.minStock)}</span></div>
+          <div class="kv"><span class="k">Max Stock</span><span class="v mono">${fmtN(i.maxStock)}</span></div>
+          <div class="kv"><span class="k">Reorder Qty</span><span class="v mono">${fmtN(i.reorderQty)}</span></div>
+          <div class="kv"><span class="k">Primary Vendor</span><span class="v">${escHtml((STATE.vendors.find(v=>v.id===STATE.itemPrimaryVendor[i.id])||{name:'—'}).name)}</span></div>
+          <div class="kv"><span class="k">Lead Time</span><span class="v">${(STATE.leadTimes[STATE.itemPrimaryVendor[i.id]]||{}).avgDays||'—'} days</span></div>
+          <div class="kv"><span class="k">Status</span><span class="v"><span class="bdg ${i.active?'b-ok':'b-bad'}">${i.active?'Active':'Inactive'}</span></span></div>
+        </div>
+      </div>`;
+  }
+
+  if(tab==='stock'){
+    return `<table class="tbl">
+      <thead><tr><th>Location</th><th>Code</th><th class="txt-r">On Hand</th><th class="txt-r">Value</th><th>Status</th></tr></thead>
+      <tbody>${STATE.locations.map(l=>{
+        const q = (STATE.stock[i.id]||{})[l.id]||0;
+        let st = q===0?'<span class="bdg b-bad">Out</span>':q<=i.minStock?'<span class="bdg b-warn">Low</span>':'<span class="bdg b-ok">OK</span>';
+        return `<tr><td><strong>${escHtml(l.name)}</strong><div class="muted-s">${escHtml(l.address)}</div></td><td class="mono">${l.code}</td><td class="txt-r mono">${fmtN(q)} ${i.uom}</td><td class="txt-r mono">${fmt(q*i.avgCost)}</td><td>${st}</td></tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  }
+
+  if(tab==='lots'){
+    const lots = STATE.lots.filter(l=>l.itemId===i.id);
+    if(!lots.length) return '<div class="empty"><div class="ic">📅</div><div>No lots tracked for this item</div><div class="muted-s">Enable lot tracking in item settings</div></div>';
+    return `<table class="tbl">
+      <thead><tr><th>Lot No</th><th>Location</th><th>Mfg Date</th><th>Exp Date</th><th>Days Left</th><th class="txt-r">Qty</th><th>Vendor</th></tr></thead>
+      <tbody>${lots.map(l=>{
+        const d = daysFrom(l.expDate);
+        const expCls = d<0?'b-bad':d<30?'b-warn':d<90?'b-info':'b-ok';
+        return `<tr><td class="mono"><strong>${l.lotNo}</strong></td><td>${escHtml((getLocation(l.locationId)||{name:'-'}).name)}</td><td>${l.mfgDate}</td><td>${l.expDate}</td><td><span class="bdg ${expCls}">${d<0?'Expired':d+'d'}</span></td><td class="txt-r mono">${fmtN(l.qty)}</td><td class="muted-s">${escHtml(l.vendor)}</td></tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  }
+
+  if(tab==='uoms'){
+    return `
+      <div class="card-flat" style="margin-bottom:12px">
+        <div class="lbl">Base UOM</div>
+        <div style="font-size:16px;font-weight:700">${i.uom} <span class="muted-s">(${escHtml((STATE.uoms.find(u=>u.code===i.uom)||{name:''}).name)})</span></div>
+      </div>
+      <div class="lbl">Alternate UOMs</div>
+      ${i.altUoms.length?`<table class="tbl"><thead><tr><th>UOM</th><th class="txt-r">Conversion</th><th>Barcode</th></tr></thead><tbody>${i.altUoms.map(u=>`<tr><td><strong>${u.uom}</strong></td><td class="txt-r mono">1 ${u.uom} = ${u.factor} ${i.uom}</td><td class="mono">${u.barcode||'-'}</td></tr>`).join('')}</tbody></table>`:'<div class="muted-s">No alternate UOMs</div>'}
+      <div class="sep"></div>
+      <div class="lbl">Barcodes (${i.barcodes.length})</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${i.barcodes.map(b=>`<span class="bdg b-sub" style="font-size:11px;padding:6px 12px"><span class="mono">${escHtml(b)}</span></span>`).join('')}</div>
+    `;
+  }
+
+  if(tab==='accounts'){
+    const asset = getAccount(i.glAsset);
+    const cogs = getAccount(i.glCogs);
+    const rev = getAccount(i.glRev);
+    return `
+      <div class="alert-banner" style="background:linear-gradient(135deg,#0d2d6e,#1849a9)">
+        <div class="ic">💼</div>
+        <div style="flex:1">
+          <h4>GL Account Linking</h4>
+          <p>These accounts are pulled from your Accounts module. Postings to inventory transactions auto-route to these ledgers.</p>
+        </div>
+      </div>
+      <div class="g3">
+        <div class="card-flat">
+          <div class="lbl" style="color:var(--blue)">Inventory Asset Account</div>
+          <div style="font-size:16px;font-weight:700;color:var(--blue);margin-top:4px">${i.glAsset||'—'}</div>
+          <div style="font-weight:600;margin-top:2px">${asset?escHtml(asset.name):'<em>Not linked</em>'}</div>
+          ${asset?`<div class="muted-s">${asset.type} · ${asset.category}</div>`:''}
+          <div class="ftext">Debited on GRN, credited on issues</div>
+        </div>
+        <div class="card-flat">
+          <div class="lbl" style="color:var(--orange)">COGS Account</div>
+          <div style="font-size:16px;font-weight:700;color:var(--orange);margin-top:4px">${i.glCogs||'—'}</div>
+          <div style="font-weight:600;margin-top:2px">${cogs?escHtml(cogs.name):'<em>Not linked</em>'}</div>
+          ${cogs?`<div class="muted-s">${cogs.type} · ${cogs.category}</div>`:''}
+          <div class="ftext">Debited on sale/issue</div>
+        </div>
+        <div class="card-flat">
+          <div class="lbl" style="color:var(--green)">Sales Revenue Account</div>
+          <div style="font-size:16px;font-weight:700;color:var(--green);margin-top:4px">${i.glRev||'—'}</div>
+          <div style="font-weight:600;margin-top:2px">${rev?escHtml(rev.name):'<em>Not linked</em>'}</div>
+          ${rev?`<div class="muted-s">${rev.type} · ${rev.category}</div>`:''}
+          <div class="ftext">Credited on sale</div>
+        </div>
+      </div>
+      <div class="sep"></div>
+      <div class="card-flat">
+        <div class="lbl">Sample Journal Entry — GRN of 10 units @ ${fmt(i.lastCost)}</div>
+        <table class="tbl" style="margin-top:8px;background:var(--surface);border-radius:6px;overflow:hidden">
+          <thead><tr><th>Account</th><th>Description</th><th class="txt-r">Debit</th><th class="txt-r">Credit</th></tr></thead>
+          <tbody>
+            <tr><td class="mono"><strong>${i.glAsset}</strong> ${asset?escHtml(asset.name):''}</td><td>Goods received - ${escHtml(i.sku)}</td><td class="txt-r mono">${fmt(i.lastCost*10)}</td><td></td></tr>
+            <tr><td class="mono"><strong>2110</strong> Accounts Payable</td><td>Vendor liability</td><td></td><td class="txt-r mono">${fmt(i.lastCost*10)}</td></tr>
+          </tbody>
+        </table>
+        <div class="ftext">Sent to PayFlow Pro as draft journal entry on GRN posting</div>
+      </div>`;
+  }
+
+  if(tab==='reorder' && reorder){
+    return `
+      <div class="alert-banner">
+        <div class="ic">🤖</div>
+        <div style="flex:1">
+          <h4>AI Reorder Analysis</h4>
+          <p>Based on 6 months of consumption data and vendor lead time history</p>
+        </div>
+      </div>
+      <div class="g3">
+        <div class="card-flat">
+          <div class="lbl">Demand Pattern</div>
+          <div class="kv"><span class="k">Avg monthly</span><span class="v mono">${reorder.avgMonthly.toFixed(0)}</span></div>
+          <div class="kv"><span class="k">Avg daily</span><span class="v mono">${reorder.avgDaily.toFixed(2)}</span></div>
+          <div class="kv"><span class="k">Variability (σ)</span><span class="v mono">±${reorder.stdDev.toFixed(0)}/mo</span></div>
+          <div class="kv"><span class="k">Trend (3mo)</span><span class="v" style="color:${reorder.trendPct>5?'var(--red)':reorder.trendPct<-5?'var(--green)':'var(--t2)'}">${reorder.trendPct>0?'+':''}${reorder.trendPct.toFixed(0)}%</span></div>
+        </div>
+        <div class="card-flat">
+          <div class="lbl">Supply Chain</div>
+          <div class="kv"><span class="k">Vendor</span><span class="v">${reorder.vendor?escHtml(reorder.vendor.name):'-'}</span></div>
+          <div class="kv"><span class="k">Lead time</span><span class="v mono">${reorder.leadDays}d</span></div>
+          <div class="kv"><span class="k">LT variability</span><span class="v mono">±${reorder.leadVariability}d</span></div>
+          <div class="kv"><span class="k">Lead-time demand</span><span class="v mono">${reorder.leadTimeDemand}</span></div>
+        </div>
+        <div class="card-flat" style="border:2px solid var(--blue)">
+          <div class="lbl" style="color:var(--blue)">AI Recommendation</div>
+          <div class="kv"><span class="k">Safety stock</span><span class="v mono">${reorder.safetyStock}</span></div>
+          <div class="kv"><span class="k">Reorder point</span><span class="v mono">${reorder.reorderPoint}</span></div>
+          <div class="kv"><span class="k">Suggested qty</span><span class="v mono" style="color:var(--blue);font-size:14px">${fmtN(reorder.eoq)}</span></div>
+          <div class="kv"><span class="k">Current cover</span><span class="v">${reorder.daysOfCover>999?'∞':reorder.daysOfCover.toFixed(0)+' days'}</span></div>
+        </div>
+      </div>
+      <div class="sep"></div>
+      ${reorder.urgency!=='ok'?`<button class="btn btn-p" style="width:100%" onclick="closeModal();createPOFromReorder('${i.id}',${reorder.eoq})">📤 Create Purchase Order for ${fmtN(reorder.eoq)} units →</button>`:'<div style="text-align:center;padding:16px;color:var(--green);font-weight:600">✓ Stock level healthy - no reorder needed</div>'}
+    `;
+  }
+  return '';
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   ITEM CREATE / EDIT FORM — with picture upload & GL links
+   ═══════════════════════════════════════════════════════ */
+
+let formPic1=null, formPic2=null;
+let formAltUoms=[], formBarcodes=[];
+
+function openItemForm(itemId){
+  const isEdit = !!itemId;
+  const i = isEdit ? getItem(itemId) : null;
+  formPic1 = i?i.pic1:null;
+  formPic2 = i?i.pic2:null;
+  formAltUoms = i?[...i.altUoms]:[];
+  formBarcodes = i?[...i.barcodes]:[];
+
+  modal(`
+    <div class="mh">
+      <div><div class="mt">${isEdit?'Edit Item':'Create New Item'}</div><div class="ms">${isEdit?escHtml(i.sku):'Inventory master record'}</div></div>
+      <button class="mx" onclick="closeModal()">×</button>
+    </div>
+    <div class="mc">
+      <div class="lbl" style="margin-bottom:8px;font-size:11px;color:var(--blue)">📷 Item Pictures (up to 2)</div>
+      <div class="pic-row" style="margin-bottom:18px">
+        ${renderPicSlot(1, formPic1)}
+        ${renderPicSlot(2, formPic2)}
+      </div>
+
+      <div class="lbl" style="font-size:11px;color:var(--blue);margin-bottom:8px">📋 Basic Information</div>
+      <div class="g2">
+        <div class="fld"><label class="lbl">Item Name *</label>
+          <input class="inp" id="fItemName" value="${i?escHtml(i.name):''}" placeholder="e.g. Mineral Water 500ml"></div>
+        <div class="fld"><label class="lbl">SKU / Item Code *</label>
+          <input class="inp mono" id="fItemSku" value="${i?escHtml(i.sku):''}" placeholder="e.g. FB-WB-500"></div>
+        <div class="fld"><label class="lbl">Category</label>
+          <select class="sel" id="fItemCat">
+            ${STATE.categories.map(c=>`<option value="${c.id}" ${i&&i.category===c.id?'selected':''}>${escHtml(c.name)}</option>`).join('')}
+          </select></div>
+        <div class="fld"><label class="lbl">Base UOM</label>
+          <select class="sel" id="fItemUom">
+            ${STATE.uoms.map(u=>`<option value="${u.code}" ${i&&i.uom===u.code?'selected':''}>${u.code} — ${escHtml(u.name)}</option>`).join('')}
+          </select></div>
+        <div class="fld"><label class="lbl">Description</label>
+          <input class="inp" id="fItemDesc" value="${i?escHtml(i.description||''):''}"></div>
+        <div class="fld"><label class="lbl">Weight (kg)</label>
+          <input class="inp mono" id="fItemWeight" type="number" step="0.01" value="${i?i.weight||'':''}"></div>
+      </div>
+
+      <div class="sep"></div>
+      <div class="lbl" style="font-size:11px;color:var(--blue);margin-bottom:8px">💰 Costing & Pricing</div>
+      <div class="g3">
+        <div class="fld"><label class="lbl">Costing Method</label>
+          <select class="sel" id="fItemCostMethod">
+            <option value="FIFO" ${i&&i.costMethod==='FIFO'?'selected':''}>FIFO — First In First Out</option>
+            <option value="LIFO" ${i&&i.costMethod==='LIFO'?'selected':''}>LIFO — Last In First Out</option>
+            <option value="WAC" ${i&&i.costMethod==='WAC'?'selected':''}>WAC — Weighted Avg Cost</option>
+            <option value="FEFO" ${i&&i.costMethod==='FEFO'?'selected':''}>FEFO — First Expire First Out</option>
+          </select></div>
+        <div class="fld"><label class="lbl">Average Cost (${STATE.currentCurrency})</label>
+          <input class="inp mono" id="fItemCost" type="number" step="0.01" value="${i?i.avgCost:''}"></div>
+        <div class="fld"><label class="lbl">Sell Price (${STATE.currentCurrency})</label>
+          <input class="inp mono" id="fItemPrice" type="number" step="0.01" value="${i?i.sellPrice:''}"></div>
+      </div>
+
+      <div class="sep"></div>
+      <div class="lbl" style="font-size:11px;color:var(--blue);margin-bottom:8px">📊 Stock Levels</div>
+      <div class="g3">
+        <div class="fld"><label class="lbl">Min Stock</label><input class="inp mono" id="fItemMin" type="number" value="${i?i.minStock:0}"></div>
+        <div class="fld"><label class="lbl">Max Stock</label><input class="inp mono" id="fItemMax" type="number" value="${i?i.maxStock:0}"></div>
+        <div class="fld"><label class="lbl">Reorder Qty</label><input class="inp mono" id="fItemReorder" type="number" value="${i?i.reorderQty:0}"></div>
+      </div>
+
+      <div class="sep"></div>
+      <div class="lbl" style="font-size:11px;color:var(--blue);margin-bottom:8px">📒 GL Account Linking — from Accounts Module</div>
+      <div class="g3">
+        <div class="fld"><label class="lbl">Inventory Asset Account</label>
+          <select class="sel" id="fItemGlAsset">
+            ${STATE.accounts.filter(a=>a.category==='Inventory').map(a=>`<option value="${a.code}" ${i&&i.glAsset===a.code?'selected':''}>${a.code} — ${escHtml(a.name)}</option>`).join('')}
+          </select>
+          <div class="ftext">Debited when stock received</div>
+        </div>
+        <div class="fld"><label class="lbl">COGS Account</label>
+          <select class="sel" id="fItemGlCogs">
+            ${STATE.accounts.filter(a=>a.category==='COGS').map(a=>`<option value="${a.code}" ${i&&i.glCogs===a.code?'selected':''}>${a.code} — ${escHtml(a.name)}</option>`).join('')}
+          </select>
+          <div class="ftext">Debited on sale/issue</div>
+        </div>
+        <div class="fld"><label class="lbl">Sales Revenue Account</label>
+          <select class="sel" id="fItemGlRev">
+            ${STATE.accounts.filter(a=>a.category==='Sales').map(a=>`<option value="${a.code}" ${i&&i.glRev===a.code?'selected':''}>${a.code} — ${escHtml(a.name)}</option>`).join('')}
+          </select>
+          <div class="ftext">Credited on sale</div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+      <div class="lbl" style="font-size:11px;color:var(--blue);margin-bottom:8px">🔖 Tracking Options</div>
+      <div class="g2">
+        <label class="chk"><input type="checkbox" id="fItemTrackLot" ${i&&i.trackLot?'checked':''}> Track lot numbers</label>
+        <label class="chk"><input type="checkbox" id="fItemTrackExp" ${i&&i.trackExpiry?'checked':''}> Track expiry dates</label>
+      </div>
+
+      <div class="sep"></div>
+      <div class="lbl" style="font-size:11px;color:var(--blue);margin-bottom:8px">🔢 Barcodes (<span id="barcodesCount">${formBarcodes.length}</span>) <button class="btn btn-xs" onclick="addBarcode()">+ Add Barcode</button></div>
+      <div id="barcodesList">${renderBarcodesList()}</div>
+
+      <div class="sep"></div>
+      <div class="lbl" style="font-size:11px;color:var(--blue);margin-bottom:8px">⚖️ Alternate UOMs (<span id="altUomsCount">${formAltUoms.length}</span>) <button class="btn btn-xs" onclick="addAltUom()">+ Add UOM</button></div>
+      <div id="altUomsList">${renderAltUomsList()}</div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-p" onclick="saveItem(${isEdit?`'${itemId}'`:'null'})">${isEdit?'Update':'Create'} Item</button>
+    </div>
+  `, 'xl');
+}
+
+function renderPicSlot(n, src){
+  return `
+    <label class="pic-slot ${src?'has-img':''}" style="cursor:pointer">
+      <input type="file" accept="image/*" style="display:none" onchange="handlePicUpload(${n},event)">
+      ${src ? `<img src="${src}"><button class="pic-rm" onclick="event.preventDefault();event.stopPropagation();removePic(${n})">×</button>` :
+              `<div class="ph-txt">📷<br>Click to upload<br><span class="muted-s">Image ${n}</span></div>`}
+    </label>`;
+}
+
+function handlePicUpload(slot, e){
+  const file = e.target.files[0];
+  if(!file) return;
+  if(file.size > 2*1024*1024){toast('Image too large - max 2MB','err');return}
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    if(slot===1) formPic1 = ev.target.result;
+    else formPic2 = ev.target.result;
+    // Re-render just the pic row
+    const slots = document.querySelectorAll('.pic-row .pic-slot');
+    if(slots[slot-1]){
+      slots[slot-1].outerHTML = renderPicSlot(slot, slot===1?formPic1:formPic2);
+      // Re-attach the handler for the new element
+    }
+    toast('Image '+slot+' uploaded','ok');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePic(n){
+  if(n===1) formPic1=null;
+  else formPic2=null;
+  const slots = document.querySelectorAll('.pic-row .pic-slot');
+  if(slots[n-1]) slots[n-1].outerHTML = renderPicSlot(n, null);
+}
+
+function renderBarcodesList(){
+  if(!formBarcodes.length) return '<div class="muted-s">No barcodes added</div>';
+  return formBarcodes.map((b,idx)=>`
+    <div style="display:flex;gap:6px;margin-bottom:6px">
+      <input class="inp mono" value="${escHtml(b)}" onchange="formBarcodes[${idx}]=this.value">
+      <button class="btn btn-xs btn-r" onclick="formBarcodes.splice(${idx},1);$('barcodesList').innerHTML=renderBarcodesList();$('barcodesCount').textContent=formBarcodes.length">×</button>
+    </div>
+  `).join('');
+}
+
+function addBarcode(){
+  formBarcodes.push('');
+  $('barcodesList').innerHTML = renderBarcodesList();
+  $('barcodesCount').textContent = formBarcodes.length;
+}
+
+function renderAltUomsList(){
+  if(!formAltUoms.length) return '<div class="muted-s">No alternate UOMs</div>';
+  return formAltUoms.map((u,idx)=>`
+    <div style="display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:6px;margin-bottom:6px">
+      <select class="sel" onchange="formAltUoms[${idx}].uom=this.value">
+        ${STATE.uoms.map(x=>`<option value="${x.code}" ${u.uom===x.code?'selected':''}>${x.code}</option>`).join('')}
+      </select>
+      <input class="inp mono" type="number" placeholder="Factor" value="${u.factor||1}" onchange="formAltUoms[${idx}].factor=parseFloat(this.value)">
+      <input class="inp mono" placeholder="Barcode (optional)" value="${u.barcode||''}" onchange="formAltUoms[${idx}].barcode=this.value">
+      <button class="btn btn-xs btn-r" onclick="formAltUoms.splice(${idx},1);$('altUomsList').innerHTML=renderAltUomsList();$('altUomsCount').textContent=formAltUoms.length">×</button>
+    </div>
+  `).join('');
+}
+
+function addAltUom(){
+  formAltUoms.push({uom:'BOX',factor:1,barcode:''});
+  $('altUomsList').innerHTML = renderAltUomsList();
+  $('altUomsCount').textContent = formAltUoms.length;
+}
+
+function saveItem(itemId){
+  const name = $('fItemName').value.trim();
+  const sku = $('fItemSku').value.trim();
+  if(!name||!sku){toast('Name and SKU required','err');return}
+
+  const data = {
+    name, sku,
+    category: $('fItemCat').value,
+    uom: $('fItemUom').value,
+    description: $('fItemDesc').value,
+    weight: parseFloat($('fItemWeight').value)||0,
+    costMethod: $('fItemCostMethod').value,
+    avgCost: parseFloat($('fItemCost').value)||0,
+    lastCost: parseFloat($('fItemCost').value)||0,
+    sellPrice: parseFloat($('fItemPrice').value)||0,
+    minStock: parseInt($('fItemMin').value)||0,
+    maxStock: parseInt($('fItemMax').value)||0,
+    reorderQty: parseInt($('fItemReorder').value)||0,
+    glAsset: $('fItemGlAsset').value,
+    glCogs: $('fItemGlCogs').value,
+    glRev: $('fItemGlRev').value,
+    trackLot: $('fItemTrackLot').checked,
+    trackExpiry: $('fItemTrackExp').checked,
+    barcodes: formBarcodes.filter(b=>b),
+    altUoms: formAltUoms.filter(u=>u.uom),
+    pic1: formPic1,
+    pic2: formPic2,
+    active: true,
+    vendors: itemId ? getItem(itemId).vendors : []
+  };
+
+  if(itemId){
+    const i = getItem(itemId);
+    Object.assign(i, data);
+    toast('Item updated ✓','ok');
+  } else {
+    const newId = uid('I');
+    STATE.items.push({id:newId,...data});
+    STATE.stock[newId]={};
+    STATE.locations.forEach(l=>STATE.stock[newId][l.id]=0);
+    toast('Item created — sent for approval ✓','ok');
+  }
+  closeModal();
+  render();
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   ALERTS PAGE
+   ═══════════════════════════════════════════════════════ */
+
+function renderAlerts(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Alerts & Notifications</div>
+        <div class="ps">${STATE.alerts.filter(a=>!a.read).length} unread of ${STATE.alerts.length}</div></div>
+      <div class="brow">
+        <button class="btn" onclick="markAllAlertsRead()">Mark all read</button>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th></th><th>Alert</th><th>Type</th><th>Time</th><th></th></tr></thead>
+        <tbody>${STATE.alerts.map(a=>`
+          <tr style="${a.read?'opacity:.55':''}">
+            <td style="text-align:center;font-size:18px">${a.severity==='high'?'🔴':a.severity==='medium'?'🟡':'🔵'}</td>
+            <td><strong>${escHtml(a.title)}</strong></td>
+            <td><span class="bdg ${a.type==='low_stock'?'b-bad':a.type==='expiry'?'b-warn':a.type==='approval'?'b-info':'b-purple'}">${a.type.replace('_',' ')}</span></td>
+            <td class="muted-s">${a.ts}</td>
+            <td>${!a.read?`<button class="btn btn-xs" onclick="markAlertRead('${a.id}')">Mark read</button>`:''}</td>
+          </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function markAlertRead(id){
+  const a = STATE.alerts.find(x=>x.id===id);
+  if(a){a.read=true;renderAlerts();renderSidebar();updateAlertCount();}
+}
+function markAllAlertsRead(){
+  STATE.alerts.forEach(a=>a.read=true);
+  renderAlerts();renderSidebar();updateAlertCount();
+  toast('All alerts marked read','ok');
+}
+
+/* ═══════════════════════════════════════════════════════
+   MY APPROVALS PAGE
+   ═══════════════════════════════════════════════════════ */
+
+function renderMyApprovals(){
+  const pending = [];
+  STATE.adjustments.forEach(d=>{if(d.status.startsWith('Pending')&&canApprove('Adjustment',d)) pending.push({type:'Adjustment',doc:d})});
+  STATE.grns.forEach(d=>{if(d.status==='Pending Approval'&&canApprove('GRN',{totalValue:grnTotal(d)})) pending.push({type:'GRN',doc:d})});
+  STATE.transfers.forEach(d=>{if(d.status==='Pending Approval'&&canApprove('Transfer',d)) pending.push({type:'Transfer',doc:d})});
+  STATE.requests.forEach(d=>{if(d.status==='Pending Approval'&&canApprove('Goods Request',d)) pending.push({type:'Goods Request',doc:d})});
+
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">My Pending Approvals</div>
+        <div class="ps">${pending.length} item${pending.length!==1?'s':''} requiring your action</div></div>
+    </div>
+    ${pending.length===0 ? '<div class="card"><div class="empty"><div class="ic">✓</div><div>All caught up!</div><div class="muted-s">No documents pending your approval</div></div></div>' :
+    `<div class="tbl-wrap">
+      <table class="tbl click">
+        <thead><tr><th>Type</th><th>Reference</th><th>Created By</th><th>Date</th><th>Status</th><th class="txt-r">Value</th><th></th></tr></thead>
+        <tbody>${pending.map(({type,doc})=>{
+          const status = approvalStatus(type, type==='GRN'?{totalValue:grnTotal(doc)}:doc);
+          let val='';
+          if(type==='Adjustment') val=fmt(Math.abs(doc.totalValue||0));
+          else if(type==='GRN') val=fmt(grnTotal(doc));
+          else val='-';
+          return `<tr onclick="openApprovalReview('${type}','${doc.id}')">
+            <td><span class="bdg ${type==='Adjustment'?'b-orange':type==='GRN'?'b-info':type==='Transfer'?'b-teal':'b-purple'}">${type}</span></td>
+            <td class="mono"><strong>${doc.id}</strong></td>
+            <td>${escHtml((getUser(doc.createdBy||doc.requestor)||{name:'-'}).name)}</td>
+            <td class="muted-s">${doc.date}</td>
+            <td><span class="bdg b-warn">${escHtml(status.msg)}</span></td>
+            <td class="txt-r mono">${val}</td>
+            <td><button class="btn btn-xs btn-p">Review →</button></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`}
+  `;
+}
+
+function openApprovalReview(type, docId){
+  let doc;
+  if(type==='Adjustment') doc = STATE.adjustments.find(d=>d.id===docId);
+  else if(type==='GRN') openGrnModal(docId);
+  else if(type==='Transfer') openTransferModal(docId);
+  else if(type==='Goods Request') openRequestModal(docId);
+  if(type==='Adjustment') openAdjustmentModal(docId);
+}
+
+/* ═══════════════════════════════════════════════════════
+   APPROVAL FLOW RENDER HELPER
+   ═══════════════════════════════════════════════════════ */
+
+function renderApprovalFlow(docType, doc){
+  const ctx = docType==='GRN'?{totalValue:grnTotal(doc)}:doc;
+  const rule = getRequiredApprovals(docType, ctx);
+  const status = approvalStatus(docType, ctx);
+  const approvals = doc.approvals||[];
+
+  const steps = [];
+  // Creator step
+  if(approvals[0]){
+    steps.push(`<div class="appr-step done">✓ ${escHtml(approvals[0].action)} • ${escHtml((getUser(approvals[0].userId)||{name:'-'}).name)}</div>`);
+  }
+  // Approval levels
+  for(let lvl=1; lvl<=rule.levels; lvl++){
+    const apprIdx = approvals.findIndex((a,idx)=>idx>0 && a.action&&a.action.startsWith('Approved'));
+    const approvedAtLevel = approvals.filter(a=>a.action&&a.action.startsWith('Approved')).length;
+    if(lvl <= approvedAtLevel){
+      const a = approvals.filter(x=>x.action&&x.action.startsWith('Approved'))[lvl-1];
+      steps.push(`<div class="appr-step done">✓ L${lvl} • ${escHtml(a?(getUser(a.userId)||{name:'-'}).name:'-')}</div>`);
+    } else if(lvl === approvedAtLevel+1 && status.state==='pending'){
+      steps.push(`<div class="appr-step cur">⏱ L${lvl} • ${escHtml(rule.roles[lvl-1]||rule.roles[0])}</div>`);
+    } else {
+      steps.push(`<div class="appr-step pend">L${lvl} • ${escHtml(rule.roles[lvl-1]||rule.roles[0])}</div>`);
+    }
+  }
+  if(status.state==='rejected'){
+    const r = approvals.find(a=>a.action==='Rejected');
+    steps.push(`<div class="appr-step rej">✗ Rejected • ${escHtml((getUser(r.userId)||{name:'-'}).name)}</div>`);
+  }
+
+  const flow = steps.map((s,i)=>i<steps.length-1 ? s+'<span class="appr-arr">→</span>' : s).join('');
+
+  return `
+    <div class="card-flat" style="margin-bottom:14px">
+      <div class="lbl" style="margin-bottom:8px">Approval Workflow • ${escHtml(rule.desc||'')}</div>
+      <div class="appr-flow">${flow}</div>
+      ${approvals.length?`<div style="margin-top:10px;font-size:11px;color:var(--t2)">
+        <div class="lbl" style="margin-bottom:4px;font-size:9px">Audit Trail</div>
+        ${approvals.map(a=>`<div style="padding:3px 0">• <strong>${escHtml(a.ts)}</strong> · ${escHtml((getUser(a.userId)||{name:'-'}).name)} <span class="muted-s">(${escHtml(a.role||'')})</span> — ${escHtml(a.action)}${a.note?`: <em>"${escHtml(a.note)}"</em>`:''}</div>`).join('')}
+      </div>`:''}
+    </div>
+  `;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   STOCK ON HAND PAGE
+   ═══════════════════════════════════════════════════════ */
+
+function renderStock(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Stock On Hand</div>
+        <div class="ps">Current quantities across ${STATE.currentLocation==='all'?'all locations':getLocation(STATE.currentLocation).name}</div></div>
+      <div class="brow">
+        <button class="btn">📤 Export</button>
+        <button class="btn btn-p" onclick="go('count')">🔢 Stock Count</button>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table class="tbl click">
+        <thead>
+          <tr>
+            <th>Item</th>
+            ${STATE.currentLocation==='all'?STATE.locations.map(l=>`<th class="txt-r">${l.code}</th>`).join(''):''}
+            <th class="txt-r">Total</th>
+            <th class="txt-r">Value</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${STATE.items.map(i=>{
+            const status = stockStatus(i.id);
+            const total = totalStock(i.id);
+            return `<tr onclick="openItem('${i.id}')">
+              <td><div style="font-weight:600">${escHtml(i.name)}</div><div class="muted-s mono">${i.sku}</div></td>
+              ${STATE.currentLocation==='all'?STATE.locations.map(l=>{
+                const q = (STATE.stock[i.id]||{})[l.id]||0;
+                return `<td class="txt-r mono ${q===0?'muted':''}">${fmtN(q)}</td>`;
+              }).join(''):''}
+              <td class="txt-r mono"><strong>${fmtN(total)}</strong></td>
+              <td class="txt-r mono">${fmt(total*i.avgCost)}</td>
+              <td><span class="bdg ${status.cls}">${status.label}</span></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LOTS & EXPIRY PAGE
+   ═══════════════════════════════════════════════════════ */
+
+function renderLots(){
+  const lots = STATE.lots.map(l=>({...l, daysLeft:daysFrom(l.expDate)})).sort((a,b)=>a.daysLeft-b.daysLeft);
+  const expired = lots.filter(l=>l.daysLeft<0);
+  const expiring30 = lots.filter(l=>l.daysLeft>=0&&l.daysLeft<=30);
+  const expiring90 = lots.filter(l=>l.daysLeft>30&&l.daysLeft<=90);
+
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Lots & Expiry Management</div>
+        <div class="ps">FEFO-tracked batches with expiry monitoring</div></div>
+    </div>
+
+    <div class="g4" style="margin-bottom:14px">
+      <div class="stat" style="${expired.length?'border-color:var(--red);background:var(--red2)':''}">
+        <div class="stat-l" style="color:var(--red)">Expired</div>
+        <div class="stat-v" style="color:var(--red)">${expired.length}</div>
+        <div class="stat-s">Write-off required</div>
+      </div>
+      <div class="stat" style="${expiring30.length?'border-color:var(--orange);background:var(--orange2)':''}">
+        <div class="stat-l" style="color:var(--orange)">Expires ≤30 days</div>
+        <div class="stat-v" style="color:var(--orange)">${expiring30.length}</div>
+        <div class="stat-s">Move/discount urgently</div>
+      </div>
+      <div class="stat">
+        <div class="stat-l" style="color:var(--amber)">Expires ≤90 days</div>
+        <div class="stat-v" style="color:var(--amber)">${expiring90.length}</div>
+        <div class="stat-s">Watch list</div>
+      </div>
+      <div class="stat">
+        <div class="stat-l">Total Lots</div>
+        <div class="stat-v">${lots.length}</div>
+        <div class="stat-s">Active batches</div>
+      </div>
+    </div>
+
+    ${(expired.length+expiring30.length)>0?`<div class="alert-banner">
+      <div class="ic">🤖</div>
+      <div style="flex:1">
+        <h4>FEFO AI Recommendation</h4>
+        <p>${expired.length} lot${expired.length>1?'s':''} expired - generate write-off adjustments. ${expiring30.length} lot${expiring30.length>1?'s':''} expiring within 30 days - prioritize for picking or promotional pricing.</p>
+      </div>
+      <button class="btn" style="background:#fff;color:var(--purple)" onclick="generateExpiryAdjustment()">Generate Write-off →</button>
+    </div>`:''}
+
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Lot No</th><th>Item</th><th>Location</th><th>Mfg Date</th><th>Exp Date</th><th>Days Left</th><th class="txt-r">Qty</th><th class="txt-r">Value</th><th>Vendor</th></tr></thead>
+        <tbody>${lots.map(l=>{
+          const i = getItem(l.itemId);
+          const d = l.daysLeft;
+          const cls = d<0?'b-bad':d<30?'b-warn':d<90?'b-info':'b-ok';
+          return `<tr><td class="mono"><strong>${l.lotNo}</strong></td>
+            <td>${escHtml(i.name)}<div class="muted-s mono">${i.sku}</div></td>
+            <td>${escHtml((getLocation(l.locationId)||{name:'-'}).name)}</td>
+            <td class="muted-s">${l.mfgDate}</td>
+            <td>${l.expDate}</td>
+            <td><span class="bdg ${cls}">${d<0?'EXPIRED '+(-d)+'d ago':d+'d'}</span></td>
+            <td class="txt-r mono">${fmtN(l.qty)}</td>
+            <td class="txt-r mono">${fmt(l.qty*l.cost)}</td>
+            <td class="muted-s">${escHtml(l.vendor)}</td></tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function generateExpiryAdjustment(){
+  const expired = STATE.lots.filter(l=>daysFrom(l.expDate)<0);
+  if(!expired.length){toast('No expired lots','warn');return}
+  toast(`Adjustment draft created for ${expired.length} expired lot(s)`,'ok');
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   GRN PAGE — fully working create/post/approve
+   ═══════════════════════════════════════════════════════ */
+
+let grnLines = [];
+
+function renderGRN(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Goods Receipt Notes (GRN)</div>
+        <div class="ps">${STATE.grns.length} GRN${STATE.grns.length!==1?'s':''} in system</div></div>
+      <div class="brow">
+        <button class="btn btn-p" onclick="openGrnForm()">+ New GRN</button>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table class="tbl click">
+        <thead><tr><th>GRN #</th><th>Date</th><th>Vendor</th><th>Location</th><th>Lines</th><th class="txt-r">Total</th><th>Status</th><th>Created By</th></tr></thead>
+        <tbody>
+          ${STATE.grns.map(g=>{
+            const v = getVendor(g.vendor);
+            return `<tr onclick="openGrnModal('${g.id}')">
+              <td class="mono"><strong>${g.id}</strong>${g.billRef?`<div class="muted-s">Bill: ${g.billRef}</div>`:''}</td>
+              <td>${g.date}</td>
+              <td>${v?escHtml(v.name):'-'}</td>
+              <td>${escHtml((getLocation(g.location)||{name:'-'}).name)}</td>
+              <td class="txt-c">${g.lines.length}</td>
+              <td class="txt-r mono">${fmt(grnTotal(g))}</td>
+              <td><span class="bdg ${statusBadge(g.status)}">${g.status}</span>${g.discrepancy?`<span class="bdg b-bad" style="margin-left:4px">⚠ Disc.</span>`:''}</td>
+              <td>${escHtml((getUser(g.createdBy)||{name:'-'}).name)}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function openGrnModal(grnId){
+  const g = STATE.grns.find(x=>x.id===grnId);
+  if(!g) return;
+  const v = getVendor(g.vendor);
+  const total = grnTotal(g);
+  const canApr = g.status==='Pending Approval' && canApprove('GRN',{totalValue:total});
+
+  modal(`
+    <div class="mh">
+      <div><div class="mt">${g.id}</div><div class="ms">${g.date} · ${v?escHtml(v.name):''}</div></div>
+      <button class="mx" onclick="closeModal()">×</button>
+    </div>
+    <div class="mc">
+      ${renderApprovalFlow('GRN', g)}
+
+      ${g.discrepancy?`<div class="alert-banner" style="background:linear-gradient(135deg,#dc2626,#991b1b)">
+        <div class="ic">⚠️</div>
+        <div style="flex:1">
+          <h4>Bill Discrepancy Detected</h4>
+          <p>Vendor Bill <strong>${g.billRef}</strong> amount ${fmt(g.billAmount)} differs from GRN total ${fmt(total)} by <strong>${fmt(g.discrepancy)}</strong> (${(g.discrepancy/g.billAmount*100).toFixed(1)}%). Routed for finance review.</p>
+        </div>
+      </div>`:''}
+
+      <div class="g3" style="margin-bottom:14px">
+        <div class="card-flat"><div class="kv"><span class="k">PO Reference</span><span class="v mono">${g.poRef||'-'}</span></div>
+          <div class="kv"><span class="k">Location</span><span class="v">${escHtml((getLocation(g.location)||{name:'-'}).name)}</span></div>
+          <div class="kv"><span class="k">Currency</span><span class="v">${g.currency}</span></div></div>
+        <div class="card-flat"><div class="kv"><span class="k">Lines Total</span><span class="v mono">${fmt(g.lines.reduce((s,l)=>s+(l.lineTotal||l.recvQty*l.unitCost),0))}</span></div>
+          <div class="kv"><span class="k">Freight</span><span class="v mono">${fmt(g.freight||0)}</span></div>
+          <div class="kv"><span class="k">Duty</span><span class="v mono">${fmt(g.duty||0)}</span></div>
+          <div class="kv"><span class="k">Insurance</span><span class="v mono">${fmt(g.insurance||0)}</span></div></div>
+        <div class="card-flat" style="border:2px solid var(--blue)"><div class="kv"><span class="k">Absorption</span><span class="v">${g.absorptionMethod}</span></div>
+          <div class="kv"><span class="k">Grand Total</span><span class="v mono" style="color:var(--blue);font-size:14px">${fmt(total)}</span></div></div>
+      </div>
+
+      <div class="lbl">Line Items</div>
+      <table class="tbl">
+        <thead><tr><th>Item</th><th>UOM</th><th class="txt-r">PO Qty</th><th class="txt-r">Recv Qty</th><th class="txt-r">Unit Cost</th><th class="txt-r">Line Total</th><th class="txt-r">Loaded Cost</th></tr></thead>
+        <tbody>${g.lines.map(l=>{
+          const i = getItem(l.itemId);
+          const lineTotal = l.lineTotal||l.recvQty*l.unitCost;
+          const linesSubtotal = g.lines.reduce((s,x)=>s+(x.lineTotal||x.recvQty*x.unitCost),0);
+          const overhead = (g.freight||0)+(g.duty||0)+(g.insurance||0);
+          const absorbed = linesSubtotal>0 ? lineTotal/linesSubtotal*overhead : 0;
+          const loaded = lineTotal+absorbed;
+          const variance = l.poQty-l.recvQty;
+          return `<tr><td>${escHtml(i.name)}<div class="muted-s mono">${i.sku}</div></td>
+            <td>${l.uom}</td>
+            <td class="txt-r mono">${fmtN(l.poQty)}</td>
+            <td class="txt-r mono"><strong>${fmtN(l.recvQty)}</strong>${variance!==0?`<div class="muted-s" style="color:var(--red)">${variance>0?'-':'+'}${Math.abs(variance)}</div>`:''}</td>
+            <td class="txt-r mono">${fmt(l.unitCost)}</td>
+            <td class="txt-r mono">${fmt(lineTotal)}</td>
+            <td class="txt-r mono"><strong>${fmt(loaded)}</strong><div class="muted-s">+${fmt(absorbed)}</div></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeModal()">Close</button>
+      ${canApr?`<button class="btn btn-r" onclick="rejectDoc('GRN','${g.id}')">Reject</button>`:''}
+      ${canApr?`<button class="btn btn-g" onclick="approveDoc('GRN','${g.id}')">Approve</button>`:''}
+      ${g.status==='Draft'&&can('post_grn')?`<button class="btn btn-p" onclick="submitGrnForApproval('${g.id}')">Submit for Approval</button>`:''}
+    </div>
+  `, 'xl');
+}
+
+function submitGrnForApproval(grnId){
+  const g = STATE.grns.find(x=>x.id===grnId);
+  if(!g) return;
+  const total = grnTotal(g);
+  const rule = getRequiredApprovals('GRN',{totalValue:total});
+  if(rule.levels === 0 || rule.condition==='value>50000' && total<=50000){
+    // No approval needed - post directly
+    g.status = 'Posted';
+    postGrnToStock(g);
+    g.approvals.push({userId:STATE.currentUser.id,role:STATE.currentUser.role,action:'Auto-Posted',ts:now(),note:'No approval required'});
+    toast(`GRN ${grnId} posted to stock`,'ok');
+  } else {
+    g.status = 'Pending Approval';
+    toast(`GRN ${grnId} submitted for approval`,'ok');
+  }
+  closeModal();
+  render();
+  renderSidebar();
+}
+
+function openGrnForm(){
+  grnLines = [];
+  modal(`
+    <div class="mh">
+      <div><div class="mt">Create New GRN</div><div class="ms">Goods Receipt Note</div></div>
+      <button class="mx" onclick="closeModal()">×</button>
+    </div>
+    <div class="mc">
+      <div class="g3">
+        <div class="fld"><label class="lbl">Vendor *</label>
+          <select class="sel" id="gVendor">
+            ${STATE.vendors.map(v=>`<option value="${v.id}">${escHtml(v.name)}</option>`).join('')}
+          </select></div>
+        <div class="fld"><label class="lbl">PO Reference</label>
+          <input class="inp mono" id="gPoRef" placeholder="PO-1187"></div>
+        <div class="fld"><label class="lbl">Date</label>
+          <input class="inp" id="gDate" type="date" value="${today()}"></div>
+        <div class="fld"><label class="lbl">Receive at Location *</label>
+          <select class="sel" id="gLoc">
+            ${STATE.locations.map(l=>`<option value="${l.id}">${escHtml(l.name)}</option>`).join('')}
+          </select></div>
+        <div class="fld"><label class="lbl">Currency</label>
+          <select class="sel" id="gCurrency">
+            ${STATE.currencies.map(c=>`<option ${c.base?'selected':''}>${c.code}</option>`).join('')}
+          </select></div>
+        <div class="fld"><label class="lbl">Bill Reference</label>
+          <input class="inp mono" id="gBillRef" placeholder="Optional"></div>
+      </div>
+
+      <div class="sep"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="lbl" style="margin:0">Line Items</div>
+        <button class="btn btn-xs btn-p" onclick="addGrnLine()">+ Add Line</button>
+      </div>
+      <div id="grnLinesBody"></div>
+
+      <div class="sep"></div>
+      <div class="g3">
+        <div class="fld"><label class="lbl">Freight Cost</label><input class="inp mono" id="gFreight" type="number" value="0"></div>
+        <div class="fld"><label class="lbl">Duty</label><input class="inp mono" id="gDuty" type="number" value="0"></div>
+        <div class="fld"><label class="lbl">Insurance</label><input class="inp mono" id="gInsurance" type="number" value="0"></div>
+        <div class="fld"><label class="lbl">Cost Absorption Method</label>
+          <select class="sel" id="gAbsorption">
+            <option value="value">By Value</option>
+            <option value="qty">By Quantity</option>
+            <option value="weight">By Weight</option>
+          </select></div>
+      </div>
+      <div class="fld"><label class="lbl">Notes</label>
+        <textarea class="txa" id="gNotes" placeholder="Optional notes"></textarea></div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn" onclick="saveGrn(true)">Save Draft</button>
+      <button class="btn btn-p" onclick="saveGrn(false)">Save & Submit</button>
+    </div>
+  `, 'xl');
+  addGrnLine();
+}
+
+function addGrnLine(){
+  grnLines.push({itemId:STATE.items[0].id, poQty:0, recvQty:0, unitCost:0});
+  renderGrnLinesBody();
+}
+
+function renderGrnLinesBody(){
+  $('grnLinesBody').innerHTML = `<table class="tbl">
+    <thead><tr><th>Item</th><th>UOM</th><th class="txt-r">PO Qty</th><th class="txt-r">Recv Qty</th><th class="txt-r">Unit Cost</th><th class="txt-r">Line Total</th><th></th></tr></thead>
+    <tbody>${grnLines.map((l,idx)=>{
+      const it = getItem(l.itemId);
+      return `<tr>
+        <td><select class="sel" onchange="grnLines[${idx}].itemId=this.value;renderGrnLinesBody()">
+          ${STATE.items.map(i=>`<option value="${i.id}" ${l.itemId===i.id?'selected':''}>${escHtml(i.name)} (${i.sku})</option>`).join('')}
+        </select></td>
+        <td>${it.uom}</td>
+        <td><input class="inp mono txt-r" type="number" value="${l.poQty}" onchange="grnLines[${idx}].poQty=parseFloat(this.value);renderGrnLinesBody()"></td>
+        <td><input class="inp mono txt-r" type="number" value="${l.recvQty}" onchange="grnLines[${idx}].recvQty=parseFloat(this.value);renderGrnLinesBody()"></td>
+        <td><input class="inp mono txt-r" type="number" step="0.01" value="${l.unitCost||it.lastCost}" onchange="grnLines[${idx}].unitCost=parseFloat(this.value);renderGrnLinesBody()"></td>
+        <td class="txt-r mono">${fmt((l.recvQty||0)*(l.unitCost||it.lastCost))}</td>
+        <td><button class="btn btn-xs btn-r" onclick="grnLines.splice(${idx},1);renderGrnLinesBody()">×</button></td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+function saveGrn(isDraft){
+  if(grnLines.length===0){toast('Add at least one line','err');return}
+  const newGrn = {
+    id: uid('GRN'),
+    date: $('gDate').value,
+    vendor: $('gVendor').value,
+    location: $('gLoc').value,
+    poRef: $('gPoRef').value,
+    currency: $('gCurrency').value,
+    billRef: $('gBillRef').value||null,
+    status: isDraft?'Draft':'Pending Approval',
+    createdBy: STATE.currentUser.id,
+    lines: grnLines.map(l=>({
+      itemId:l.itemId,
+      poQty:l.poQty||l.recvQty,
+      recvQty:l.recvQty,
+      uom:getItem(l.itemId).uom,
+      unitCost:l.unitCost||getItem(l.itemId).lastCost,
+      lineTotal:(l.recvQty||0)*(l.unitCost||getItem(l.itemId).lastCost)
+    })),
+    freight: parseFloat($('gFreight').value)||0,
+    duty: parseFloat($('gDuty').value)||0,
+    insurance: parseFloat($('gInsurance').value)||0,
+    absorptionMethod: $('gAbsorption').value,
+    approvals:[{userId:STATE.currentUser.id,role:STATE.currentUser.role,action:'Created',ts:now(),note:$('gNotes').value}]
+  };
+  STATE.grns.push(newGrn);
+  toast(`GRN ${newGrn.id} ${isDraft?'saved as draft':'submitted for approval'}`,'ok');
+  closeModal();
+  go('grn');
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   TRANSFERS PAGE
+   ═══════════════════════════════════════════════════════ */
+
+let trfLines = [];
+
+function renderTransfers(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Stock Transfers</div>
+        <div class="ps">Inter-location movement</div></div>
+      <div class="brow">
+        <button class="btn btn-p" onclick="openTransferForm()">+ New Transfer</button>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table class="tbl click">
+        <thead><tr><th>Transfer #</th><th>Date</th><th>From</th><th>To</th><th>Lines</th><th>Status</th><th>Created By</th></tr></thead>
+        <tbody>${STATE.transfers.map(t=>`
+          <tr onclick="openTransferModal('${t.id}')">
+            <td class="mono"><strong>${t.id}</strong></td>
+            <td>${t.date}</td>
+            <td>${escHtml((getLocation(t.fromLoc)||{name:'-'}).name)}</td>
+            <td>${escHtml((getLocation(t.toLoc)||{name:'-'}).name)}</td>
+            <td class="txt-c">${t.lines.length}</td>
+            <td><span class="bdg ${statusBadge(t.status)}">${t.status}</span></td>
+            <td>${escHtml((getUser(t.createdBy)||{name:'-'}).name)}</td>
+          </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function openTransferModal(id){
+  const t = STATE.transfers.find(x=>x.id===id);
+  if(!t) return;
+  const canApr = t.status==='Pending Approval' && canApprove('Transfer',t);
+  const canShip = t.status==='In Transit' && can('create_transfer');
+
+  modal(`
+    <div class="mh">
+      <div><div class="mt">${t.id}</div><div class="ms">${t.date} · ${escHtml((getLocation(t.fromLoc)||{name:''}).name)} → ${escHtml((getLocation(t.toLoc)||{name:''}).name)}</div></div>
+      <button class="mx" onclick="closeModal()">×</button>
+    </div>
+    <div class="mc">
+      ${renderApprovalFlow('Transfer', t)}
+      <table class="tbl">
+        <thead><tr><th>Item</th><th>UOM</th><th class="txt-r">Qty</th><th class="txt-r">From Stock</th><th class="txt-r">To Stock</th></tr></thead>
+        <tbody>${t.lines.map(l=>{
+          const i = getItem(l.itemId);
+          return `<tr><td>${escHtml(i.name)}<div class="muted-s mono">${i.sku}</div></td>
+            <td>${l.uom}</td>
+            <td class="txt-r mono"><strong>${fmtN(l.qty)}</strong></td>
+            <td class="txt-r mono">${fmtN((STATE.stock[l.itemId]||{})[t.fromLoc]||0)}</td>
+            <td class="txt-r mono">${fmtN((STATE.stock[l.itemId]||{})[t.toLoc]||0)}</td></tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeModal()">Close</button>
+      ${canApr?`<button class="btn btn-r" onclick="rejectDoc('Transfer','${t.id}')">Reject</button>`:''}
+      ${canApr?`<button class="btn btn-g" onclick="approveDoc('Transfer','${t.id}')">Approve & Ship</button>`:''}
+      ${canShip?`<button class="btn btn-p" onclick="receiveTransfer('${t.id}')">Mark Received at Destination</button>`:''}
+    </div>
+  `, 'lg');
+}
+
+function receiveTransfer(id){
+  const t = STATE.transfers.find(x=>x.id===id);
+  if(!t) return;
+  t.lines.forEach(l=>{
+    if(!STATE.stock[l.itemId][t.fromLoc]) STATE.stock[l.itemId][t.fromLoc]=0;
+    if(!STATE.stock[l.itemId][t.toLoc]) STATE.stock[l.itemId][t.toLoc]=0;
+    STATE.stock[l.itemId][t.fromLoc] -= l.qty;
+    STATE.stock[l.itemId][t.toLoc] += l.qty;
+  });
+  t.status = 'Posted';
+  t.approvals.push({userId:STATE.currentUser.id,role:STATE.currentUser.role,action:'Received',ts:now()});
+  toast(`Transfer ${id} received - stock updated`,'ok');
+  closeModal();
+  render();
+}
+
+function openTransferForm(){
+  trfLines = [{itemId:STATE.items[0].id, qty:0}];
+  modal(`
+    <div class="mh">
+      <div><div class="mt">Create Stock Transfer</div></div>
+      <button class="mx" onclick="closeModal()">×</button>
+    </div>
+    <div class="mc">
+      <div class="g3">
+        <div class="fld"><label class="lbl">From Location *</label>
+          <select class="sel" id="tFrom">${STATE.locations.map(l=>`<option value="${l.id}">${escHtml(l.name)}</option>`).join('')}</select></div>
+        <div class="fld"><label class="lbl">To Location *</label>
+          <select class="sel" id="tTo">${STATE.locations.map((l,i)=>`<option value="${l.id}" ${i===1?'selected':''}>${escHtml(l.name)}</option>`).join('')}</select></div>
+        <div class="fld"><label class="lbl">Transfer Date</label>
+          <input class="inp" id="tDate" type="date" value="${today()}"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="lbl" style="margin:0">Items to Transfer</div>
+        <button class="btn btn-xs btn-p" onclick="trfLines.push({itemId:STATE.items[0].id,qty:0});renderTrfLines()">+ Add Line</button>
+      </div>
+      <div id="trfLinesBody"></div>
+      <div class="fld" style="margin-top:14px"><label class="lbl">Notes</label>
+        <textarea class="txa" id="tNotes"></textarea></div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-p" onclick="saveTransfer()">Submit for Approval</button>
+    </div>
+  `, 'lg');
+  renderTrfLines();
+}
+
+function renderTrfLines(){
+  $('trfLinesBody').innerHTML = `<table class="tbl">
+    <thead><tr><th>Item</th><th>UOM</th><th class="txt-r">Qty</th><th class="txt-r">Available</th><th></th></tr></thead>
+    <tbody>${trfLines.map((l,idx)=>{
+      const it = getItem(l.itemId);
+      const fromLoc = $('tFrom')?$('tFrom').value:STATE.locations[0].id;
+      const avail = (STATE.stock[l.itemId]||{})[fromLoc]||0;
+      return `<tr><td><select class="sel" onchange="trfLines[${idx}].itemId=this.value;renderTrfLines()">
+        ${STATE.items.map(i=>`<option value="${i.id}" ${l.itemId===i.id?'selected':''}>${escHtml(i.name)}</option>`).join('')}</select></td>
+        <td>${it.uom}</td>
+        <td><input class="inp mono txt-r" type="number" value="${l.qty}" onchange="trfLines[${idx}].qty=parseFloat(this.value);renderTrfLines()"></td>
+        <td class="txt-r mono ${l.qty>avail?'':''}" style="${l.qty>avail?'color:var(--red)':''}">${fmtN(avail)}${l.qty>avail?' ⚠':''}</td>
+        <td><button class="btn btn-xs btn-r" onclick="trfLines.splice(${idx},1);renderTrfLines()">×</button></td></tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+function saveTransfer(){
+  if(trfLines.length===0||trfLines.some(l=>l.qty<=0)){toast('Add lines with valid quantities','err');return}
+  if($('tFrom').value===$('tTo').value){toast('Source and destination must differ','err');return}
+  const newT = {
+    id: uid('TR'),
+    date: $('tDate').value,
+    fromLoc: $('tFrom').value,
+    toLoc: $('tTo').value,
+    status:'Pending Approval',
+    createdBy: STATE.currentUser.id,
+    lines: trfLines.map(l=>({itemId:l.itemId,qty:l.qty,uom:getItem(l.itemId).uom})),
+    approvals:[{userId:STATE.currentUser.id,role:STATE.currentUser.role,action:'Created',ts:now(),note:$('tNotes').value}]
+  };
+  STATE.transfers.push(newT);
+  toast(`Transfer ${newT.id} submitted for approval`,'ok');
+  closeModal();
+  go('transfers');
+}
+
+/* ═══════════════════════════════════════════════════════
+   ADJUSTMENTS PAGE
+   ═══════════════════════════════════════════════════════ */
+
+let adjLines = [];
+
+function renderAdjustments(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Stock Adjustments</div>
+        <div class="ps">Quantity corrections with reason codes & approval workflow</div></div>
+      <div class="brow">
+        <button class="btn btn-p" onclick="openAdjustmentForm()">+ New Adjustment</button>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table class="tbl click">
+        <thead><tr><th>Adj #</th><th>Date</th><th>Location</th><th>Reason</th><th>Lines</th><th class="txt-r">Total Value</th><th>Status</th><th>Created By</th></tr></thead>
+        <tbody>${STATE.adjustments.map(a=>{
+          const r = STATE.reasonCodes.find(rc=>rc.code===a.reasonCode);
+          return `<tr onclick="openAdjustmentModal('${a.id}')">
+            <td class="mono"><strong>${a.id}</strong></td>
+            <td>${a.date}</td>
+            <td>${escHtml((getLocation(a.location)||{name:'-'}).name)}</td>
+            <td><span class="bdg b-info">${a.reasonCode}</span><div class="muted-s">${r?escHtml(r.name):''}</div></td>
+            <td class="txt-c">${a.lines.length}</td>
+            <td class="txt-r mono" style="${a.totalValue<0?'color:var(--red)':'color:var(--green)'}">${fmt(a.totalValue)}</td>
+            <td><span class="bdg ${statusBadge(a.status)}">${a.status}</span></td>
+            <td>${escHtml((getUser(a.createdBy)||{name:'-'}).name)}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function openAdjustmentModal(id){
+  const a = STATE.adjustments.find(x=>x.id===id);
+  if(!a) return;
+  const r = STATE.reasonCodes.find(rc=>rc.code===a.reasonCode);
+  const canApr = a.status.startsWith('Pending') && canApprove('Adjustment',a);
+  const glAccount = getAccount(r?r.glAccount:'');
+
+  modal(`
+    <div class="mh">
+      <div><div class="mt">${a.id}</div><div class="ms">${a.date} · ${escHtml((getLocation(a.location)||{name:''}).name)} · ${a.reasonCode} ${r?escHtml(r.name):''}</div></div>
+      <button class="mx" onclick="closeModal()">×</button>
+    </div>
+    <div class="mc">
+      ${renderApprovalFlow('Adjustment', a)}
+
+      ${glAccount?`<div class="card-flat" style="margin-bottom:14px">
+        <div class="lbl">GL Posting (on approval)</div>
+        <div style="display:flex;justify-content:space-between"><span>Account: <strong class="mono">${glAccount.code} ${escHtml(glAccount.name)}</strong></span>
+        <span class="mono"><strong>${fmt(Math.abs(a.totalValue))}</strong> ${a.totalValue<0?'DR':'CR'}</span></div>
+      </div>`:''}
+
+      <table class="tbl">
+        <thead><tr><th>Item</th><th class="txt-r">System Qty</th><th class="txt-r">Actual Qty</th><th class="txt-r">Variance</th><th class="txt-r">Unit Cost</th><th class="txt-r">Value</th></tr></thead>
+        <tbody>${a.lines.map(l=>{
+          const i = getItem(l.itemId);
+          return `<tr><td>${escHtml(i.name)}<div class="muted-s mono">${i.sku}</div></td>
+            <td class="txt-r mono">${fmtN(l.systemQty)}</td>
+            <td class="txt-r mono">${fmtN(l.countQty)}</td>
+            <td class="txt-r mono" style="color:${l.variance<0?'var(--red)':'var(--green)'};font-weight:700">${l.variance>0?'+':''}${l.variance}</td>
+            <td class="txt-r mono">${fmt(l.unitCost)}</td>
+            <td class="txt-r mono" style="color:${l.value<0?'var(--red)':'var(--green)'}">${fmt(l.value)}</td></tr>`;
+        }).join('')}</tbody>
+        <tfoot><tr><td colspan="5" class="txt-r"><strong>Total Adjustment Value</strong></td><td class="txt-r mono"><strong style="color:${a.totalValue<0?'var(--red)':'var(--green)'}">${fmt(a.totalValue)}</strong></td></tr></tfoot>
+      </table>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeModal()">Close</button>
+      ${canApr?`<button class="btn btn-r" onclick="rejectDoc('Adjustment','${a.id}')">Reject</button>`:''}
+      ${canApr?`<button class="btn btn-g" onclick="approveDoc('Adjustment','${a.id}')">Approve</button>`:''}
+    </div>
+  `, 'lg');
+}
+
+function openAdjustmentForm(){
+  adjLines = [];
+  modal(`
+    <div class="mh">
+      <div><div class="mt">Create Stock Adjustment</div></div>
+      <button class="mx" onclick="closeModal()">×</button>
+    </div>
+    <div class="mc">
+      <div class="g3">
+        <div class="fld"><label class="lbl">Location *</label>
+          <select class="sel" id="aLoc">${STATE.locations.map(l=>`<option value="${l.id}">${escHtml(l.name)}</option>`).join('')}</select></div>
+        <div class="fld"><label class="lbl">Reason Code *</label>
+          <select class="sel" id="aReason">${STATE.reasonCodes.map(r=>`<option value="${r.code}">${r.code} — ${escHtml(r.name)}</option>`).join('')}</select></div>
+        <div class="fld"><label class="lbl">Date</label>
+          <input class="inp" id="aDate" type="date" value="${today()}"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="lbl" style="margin:0">Adjustment Lines</div>
+        <button class="btn btn-xs btn-p" onclick="addAdjLine()">+ Add Line</button>
+      </div>
+      <div id="adjLinesBody"></div>
+      <div class="fld" style="margin-top:14px"><label class="lbl">Notes / Justification</label>
+        <textarea class="txa" id="aNotes" placeholder="Required for audit trail"></textarea></div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-p" onclick="saveAdjustment()">Submit for Approval</button>
+    </div>
+  `, 'lg');
+  addAdjLine();
+}
+
+function addAdjLine(){
+  adjLines.push({itemId:STATE.items[0].id, countQty:0});
+  renderAdjLines();
+}
+
+function renderAdjLines(){
+  const loc = $('aLoc')?$('aLoc').value:STATE.locations[0].id;
+  $('adjLinesBody').innerHTML = `<table class="tbl">
+    <thead><tr><th>Item</th><th class="txt-r">System Qty</th><th class="txt-r">Actual Count</th><th class="txt-r">Variance</th><th class="txt-r">Value</th><th></th></tr></thead>
+    <tbody>${adjLines.map((l,idx)=>{
+      const it = getItem(l.itemId);
+      const sysQty = (STATE.stock[l.itemId]||{})[loc]||0;
+      const variance = (l.countQty||0)-sysQty;
+      const value = variance*it.avgCost;
+      return `<tr><td><select class="sel" onchange="adjLines[${idx}].itemId=this.value;renderAdjLines()">
+        ${STATE.items.map(i=>`<option value="${i.id}" ${l.itemId===i.id?'selected':''}>${escHtml(i.name)}</option>`).join('')}</select></td>
+        <td class="txt-r mono">${fmtN(sysQty)}</td>
+        <td><input class="inp mono txt-r" type="number" value="${l.countQty}" onchange="adjLines[${idx}].countQty=parseFloat(this.value);renderAdjLines()"></td>
+        <td class="txt-r mono" style="color:${variance<0?'var(--red)':variance>0?'var(--green)':'var(--t3)'};font-weight:700">${variance>0?'+':''}${variance}</td>
+        <td class="txt-r mono" style="color:${value<0?'var(--red)':'var(--green)'}">${fmt(value)}</td>
+        <td><button class="btn btn-xs btn-r" onclick="adjLines.splice(${idx},1);renderAdjLines()">×</button></td></tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+function saveAdjustment(){
+  if(adjLines.length===0){toast('Add at least one line','err');return}
+  const loc = $('aLoc').value;
+  const lines = adjLines.map(l=>{
+    const it = getItem(l.itemId);
+    const systemQty = (STATE.stock[l.itemId]||{})[loc]||0;
+    const variance = l.countQty - systemQty;
+    return {itemId:l.itemId,systemQty,countQty:l.countQty,variance,unitCost:it.avgCost,value:variance*it.avgCost};
+  });
+  const totalValue = lines.reduce((s,l)=>s+l.value,0);
+  const newAdj = {
+    id: uid('ADJ'),
+    date: $('aDate').value,
+    location: loc,
+    reasonCode: $('aReason').value,
+    createdBy: STATE.currentUser.id,
+    status:'Pending Approval',
+    lines,
+    totalValue,
+    approvals:[{userId:STATE.currentUser.id,role:STATE.currentUser.role,action:'Created',ts:now(),note:$('aNotes').value}]
+  };
+  STATE.adjustments.push(newAdj);
+
+  // Check if needs L2
+  const rule = getRequiredApprovals('Adjustment', newAdj);
+  if(rule.levels>1) newAdj.status = `Pending Approval L1`;
+  toast(`Adjustment ${newAdj.id} submitted (needs ${rule.levels} approval level${rule.levels>1?'s':''})`,'ok');
+  closeModal();
+  go('adjustments');
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   GOODS REQUESTS
+   ═══════════════════════════════════════════════════════ */
+
+let reqLines = [];
+
+function renderRequests(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Goods Requests</div><div class="ps">Departmental stock requests</div></div>
+      <div class="brow"><button class="btn btn-p" onclick="openRequestForm()">+ New Request</button></div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl click">
+        <thead><tr><th>Request #</th><th>Date</th><th>Requestor</th><th>For Location</th><th>Lines</th><th>Status</th></tr></thead>
+        <tbody>${STATE.requests.map(r=>`
+          <tr onclick="openRequestModal('${r.id}')">
+            <td class="mono"><strong>${r.id}</strong></td>
+            <td>${r.date}</td>
+            <td>${escHtml((getUser(r.requestor)||{name:'-'}).name)}</td>
+            <td>${escHtml((getLocation(r.location)||{name:'-'}).name)}</td>
+            <td class="txt-c">${r.lines.length}</td>
+            <td><span class="bdg ${statusBadge(r.status)}">${r.status}</span></td>
+          </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function openRequestModal(id){
+  const r = STATE.requests.find(x=>x.id===id);
+  if(!r) return;
+  const canApr = r.status==='Pending Approval' && canApprove('Goods Request',r);
+  modal(`
+    <div class="mh"><div><div class="mt">${r.id}</div><div class="ms">Requested by ${escHtml((getUser(r.requestor)||{name:'-'}).name)} on ${r.date}</div></div>
+      <button class="mx" onclick="closeModal()">×</button></div>
+    <div class="mc">
+      ${renderApprovalFlow('Goods Request', r)}
+      <table class="tbl">
+        <thead><tr><th>Item</th><th>UOM</th><th class="txt-r">Qty</th><th>Note</th></tr></thead>
+        <tbody>${r.lines.map(l=>{
+          const i = getItem(l.itemId);
+          return `<tr><td>${escHtml(i.name)}<div class="muted-s mono">${i.sku}</div></td>
+            <td>${l.uom}</td><td class="txt-r mono">${fmtN(l.qty)}</td><td class="muted-s">${escHtml(l.note||'')}</td></tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeModal()">Close</button>
+      ${canApr?`<button class="btn btn-r" onclick="rejectDoc('Goods Request','${r.id}')">Reject</button>`:''}
+      ${canApr?`<button class="btn btn-g" onclick="approveDoc('Goods Request','${r.id}')">Approve</button>`:''}
+    </div>
+  `, 'lg');
+}
+
+function openRequestForm(){
+  reqLines = [{itemId:STATE.items[0].id,qty:0,note:''}];
+  modal(`
+    <div class="mh"><div><div class="mt">New Goods Request</div></div><button class="mx" onclick="closeModal()">×</button></div>
+    <div class="mc">
+      <div class="g2">
+        <div class="fld"><label class="lbl">For Location</label>
+          <select class="sel" id="rLoc">${STATE.locations.map(l=>`<option value="${l.id}">${escHtml(l.name)}</option>`).join('')}</select></div>
+        <div class="fld"><label class="lbl">Date</label><input class="inp" id="rDate" type="date" value="${today()}"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="lbl" style="margin:0">Items Needed</div>
+        <button class="btn btn-xs btn-p" onclick="reqLines.push({itemId:STATE.items[0].id,qty:0,note:''});renderReqLines()">+ Add</button>
+      </div>
+      <div id="reqLinesBody"></div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-p" onclick="saveRequest()">Submit</button>
+    </div>
+  `, 'lg');
+  renderReqLines();
+}
+
+function renderReqLines(){
+  $('reqLinesBody').innerHTML = `<table class="tbl">
+    <thead><tr><th>Item</th><th>UOM</th><th class="txt-r">Qty</th><th>Note</th><th></th></tr></thead>
+    <tbody>${reqLines.map((l,idx)=>{
+      const it = getItem(l.itemId);
+      return `<tr><td><select class="sel" onchange="reqLines[${idx}].itemId=this.value;renderReqLines()">
+        ${STATE.items.map(i=>`<option value="${i.id}" ${l.itemId===i.id?'selected':''}>${escHtml(i.name)}</option>`).join('')}</select></td>
+        <td>${it.uom}</td>
+        <td><input class="inp mono txt-r" type="number" value="${l.qty}" onchange="reqLines[${idx}].qty=parseFloat(this.value)"></td>
+        <td><input class="inp" value="${escHtml(l.note||'')}" onchange="reqLines[${idx}].note=this.value"></td>
+        <td><button class="btn btn-xs btn-r" onclick="reqLines.splice(${idx},1);renderReqLines()">×</button></td></tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+function saveRequest(){
+  if(reqLines.some(l=>l.qty<=0)){toast('All qty must be > 0','err');return}
+  const newR = {
+    id: uid('GR'),
+    date: $('rDate').value,
+    requestor: STATE.currentUser.id,
+    location: $('rLoc').value,
+    status:'Pending Approval',
+    lines: reqLines.map(l=>({itemId:l.itemId,qty:l.qty,uom:getItem(l.itemId).uom,note:l.note})),
+    approvals:[{userId:STATE.currentUser.id,role:STATE.currentUser.role,action:'Submitted',ts:now()}]
+  };
+  STATE.requests.push(newR);
+  toast(`Request ${newR.id} submitted`,'ok');
+  closeModal();
+  go('requests');
+}
+
+/* ═══════════════════════════════════════════════════════
+   STOCK COUNT
+   ═══════════════════════════════════════════════════════ */
+
+function renderCount(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Stock Count</div><div class="ps">Cycle counting & physical inventory</div></div>
+      <div class="brow"><button class="btn btn-p" onclick="startStockCount()">▶ Start Count Session</button></div>
+    </div>
+    <div class="card">
+      <div class="card-t">Quick Count Entry</div>
+      <p class="muted-s">Select location and items, enter counted quantities. Variances will be generated as adjustments needing approval.</p>
+      <div style="margin-top:14px"><button class="btn btn-p" onclick="openAdjustmentForm()">Go to Adjustment Form (with CNT reason)</button></div>
+    </div>
+    <div class="card">
+      <div class="card-t">Count History</div>
+      <table class="tbl">
+        <thead><tr><th>Date</th><th>Location</th><th>Items Counted</th><th>Variances</th><th>Net Value</th></tr></thead>
+        <tbody>
+          <tr><td>2026-05-07</td><td>Male Main Warehouse</td><td>1</td><td><span class="bdg b-warn">1</span></td><td class="mono">${fmt(-104)}</td></tr>
+          <tr><td>2026-04-15</td><td>Hulhumale Branch</td><td>284</td><td><span class="bdg b-ok">0</span></td><td class="mono">${fmt(0)}</td></tr>
+          <tr><td>2026-03-30</td><td>Resort Supply Hub</td><td>168</td><td><span class="bdg b-warn">3</span></td><td class="mono" style="color:var(--red)">${fmt(-2840)}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function startStockCount(){toast('Count session feature - use Adjustment form with CNT reason','ok');openAdjustmentForm();}
+
+/* ═══════════════════════════════════════════════════════
+   VENDOR BILL MATCHING
+   ═══════════════════════════════════════════════════════ */
+
+function renderBills(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Vendor Bill Matching</div>
+        <div class="ps">3-way match: Bill ↔ GRN ↔ PO</div></div>
+      <div class="brow">
+        <button class="btn btn-p" onclick="toast('Bill upload — drag PDF/image here','ok')">📤 Upload Bill</button>
+      </div>
+    </div>
+
+    <div class="alert-banner">
+      <div class="ic">🤖</div>
+      <div style="flex:1">
+        <h4>AI Bill Analyzer</h4>
+        <p>Upload vendor bills (PDF/image). AI extracts line items, matches against PO and GRN quantities, flags discrepancies for finance review.</p>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Bill #</th><th>Vendor</th><th>Date</th><th>Amount</th><th>GRN Match</th><th>Discrepancy</th><th>Status</th><th></th></tr></thead>
+        <tbody>${STATE.vendorBills.map(b=>{
+          const v = getVendor(b.vendor);
+          const discPct = b.discrepancy?(b.discrepancy/b.amount*100).toFixed(1):0;
+          return `<tr>
+            <td class="mono"><strong>${b.id}</strong></td>
+            <td>${v?escHtml(v.name):'-'}</td>
+            <td>${b.date}</td>
+            <td class="txt-r mono">${fmt(b.amount)}</td>
+            <td class="mono">${b.grnRef}</td>
+            <td class="mono" style="color:${b.discrepancy?'var(--red)':'var(--green)'}">${b.discrepancy?fmt(b.discrepancy)+' ('+discPct+'%)':'✓ None'}</td>
+            <td><span class="bdg ${b.status==='Matched'?'b-ok':'b-bad'}">${b.status}</span></td>
+            <td>${b.status==='Discrepancy'?`<button class="btn btn-xs btn-p" onclick="openGrnModal('${b.grnRef}')">Review</button>`:''}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   GL ACCOUNTS PAGE (from Accounts module integration)
+   ═══════════════════════════════════════════════════════ */
+
+function renderAccounts(){
+  const groups = {};
+  STATE.accounts.forEach(a=>{
+    if(!groups[a.category]) groups[a.category]=[];
+    groups[a.category].push(a);
+  });
+
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">GL Accounts — Inventory Linked</div>
+        <div class="ps">Chart of Accounts synced from your Accounts module · Use these to link items for automated journal posting</div></div>
+      <div class="brow">
+        <button class="btn" onclick="toast('Synced from Accounts module','ok')">🔄 Sync from Accounts</button>
+      </div>
+    </div>
+
+    <div class="alert-banner">
+      <div class="ic">💼</div>
+      <div style="flex:1">
+        <h4>Integration with Accounts Module</h4>
+        <p>These GL accounts are the bridge between Inventory and your Finance ledger. Every GRN, transfer, adjustment, and sale generates journal entries posted to these accounts automatically.</p>
+      </div>
+    </div>
+
+    ${Object.keys(groups).map(cat=>`
+      <div class="card">
+        <div class="card-t">
+          <span>${cat==='Inventory'?'📦 Inventory (Assets)':cat==='COGS'?'💸 Cost of Goods Sold':cat==='Sales'?'💰 Sales Revenue':cat==='Adjustment'?'⚙️ Adjustments':cat}</span>
+          <span class="bdg b-info">${groups[cat].length} accounts</span>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Code</th><th>Account Name</th><th>Type</th><th>Items Using</th><th>Used In</th></tr></thead>
+          <tbody>${groups[cat].map(a=>{
+            const itemsUsing = STATE.items.filter(i=>i.glAsset===a.code||i.glCogs===a.code||i.glRev===a.code).length;
+            return `<tr>
+              <td class="mono"><strong>${a.code}</strong></td>
+              <td>${escHtml(a.name)}</td>
+              <td><span class="bdg ${a.type==='Asset'?'b-ok':a.type==='Expense'?'b-orange':'b-info'}">${a.type}</span></td>
+              <td class="txt-c">${itemsUsing}</td>
+              <td class="muted-s">${cat==='Inventory'?'GRN posting · Stock adjustments':cat==='COGS'?'Sales / Issues':cat==='Sales'?'Sales invoices':'Adjustment postings'}</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>
+    `).join('')}
+  `;
+}
+
+/* ═══════════════════════════════════════════════════════
+   APPROVAL RULES PAGE
+   ═══════════════════════════════════════════════════════ */
+
+function renderApprovalRules(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Approval Rules</div>
+        <div class="ps">Configure approval workflows by document type & value thresholds</div></div>
+      <div class="brow"><button class="btn btn-p" onclick="openApprovalRuleForm()">+ New Rule</button></div>
+    </div>
+
+    <div class="alert-banner">
+      <div class="ic">🔒</div>
+      <div style="flex:1">
+        <h4>How approval rules work</h4>
+        <p>Rules match by document type and condition (value-based or always). The system finds the first matching rule and routes through specified levels in order. Users in those roles can approve.</p>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Doc Type</th><th>Condition</th><th>Levels</th><th>Approvers (in order)</th><th>Description</th><th></th></tr></thead>
+        <tbody>${STATE.approvalRules.map(r=>`
+          <tr>
+            <td><span class="bdg ${r.doc==='Adjustment'?'b-orange':r.doc==='GRN'?'b-info':r.doc==='Transfer'?'b-teal':r.doc==='Vendor Bill'?'b-bad':'b-purple'}">${r.doc}</span></td>
+            <td class="mono muted-s">${escHtml(r.condition)}</td>
+            <td class="txt-c"><strong>${r.levels}</strong></td>
+            <td>${r.roles.map((role,i)=>`<span class="bdg b-info" style="margin-right:3px">L${i+1}: ${escHtml(role)}</span>`).join('')}</td>
+            <td class="muted-s">${escHtml(r.desc)}</td>
+            <td>
+              ${can('manage_setup')?`<button class="btn btn-xs btn-r" onclick="deleteApprovalRule('${r.id}')">×</button>`:''}
+            </td>
+          </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function deleteApprovalRule(id){
+  if(!confirm('Delete this approval rule?')) return;
+  STATE.approvalRules = STATE.approvalRules.filter(r=>r.id!==id);
+  renderApprovalRules();
+  toast('Rule deleted','ok');
+}
+
+function openApprovalRuleForm(){
+  modal(`
+    <div class="mh"><div><div class="mt">New Approval Rule</div></div><button class="mx" onclick="closeModal()">×</button></div>
+    <div class="mc">
+      <div class="g2">
+        <div class="fld"><label class="lbl">Document Type</label>
+          <select class="sel" id="arDoc">
+            <option>Adjustment</option><option>GRN</option><option>Transfer</option>
+            <option>Goods Request</option><option>Vendor Bill</option><option>Item</option>
+          </select></div>
+        <div class="fld"><label class="lbl">Levels Required</label>
+          <select class="sel" id="arLevels"><option>1</option><option>2</option><option>3</option></select></div>
+      </div>
+      <div class="fld"><label class="lbl">Condition</label>
+        <input class="inp mono" id="arCond" placeholder="always | value<5000 | value>=25000 | discrepancy>2">
+        <div class="ftext">Examples: <code>always</code>, <code>value&lt;5000</code>, <code>value&gt;=5000 AND value&lt;25000</code>, <code>value&gt;=25000</code></div>
+      </div>
+      <div class="fld"><label class="lbl">Approver Roles (comma separated, in order)</label>
+        <input class="inp" id="arRoles" placeholder="Inventory Manager, Finance Controller, CEO / Admin">
+      </div>
+      <div class="fld"><label class="lbl">Description</label>
+        <input class="inp" id="arDesc" placeholder="What this rule covers">
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-p" onclick="saveApprovalRule()">Save Rule</button>
+    </div>
+  `, 'lg');
+}
+
+function saveApprovalRule(){
+  STATE.approvalRules.push({
+    id: uid('AR'),
+    doc: $('arDoc').value,
+    condition: $('arCond').value||'always',
+    levels: parseInt($('arLevels').value),
+    roles: $('arRoles').value.split(',').map(s=>s.trim()).filter(Boolean),
+    desc: $('arDesc').value
+  });
+  toast('Approval rule added','ok');
+  closeModal();
+  renderApprovalRules();
+}
+
+/* ═══════════════════════════════════════════════════════
+   USERS & ROLES PAGE
+   ═══════════════════════════════════════════════════════ */
+
+function renderUsers(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Users & Roles</div>
+        <div class="ps">${STATE.users.length} active users · Each role has different permissions and approval authority</div></div>
+      <div class="brow"><button class="btn btn-p" onclick="toast('Invite user form','ok')">+ Invite User</button></div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th></th><th>Name</th><th>Email</th><th>Role</th><th>Approval Level</th><th>Permissions</th><th></th></tr></thead>
+        <tbody>${STATE.users.map(u=>`
+          <tr>
+            <td><div class="user-av" style="width:36px;height:36px;background:linear-gradient(135deg,${u.color},${u.color}cc);font-size:12px">${u.avatar}</div></td>
+            <td><strong>${escHtml(u.name)}</strong>${STATE.currentUser.id===u.id?'<span class="bdg b-info" style="margin-left:6px">YOU</span>':''}</td>
+            <td class="muted-s">${escHtml(u.email)}</td>
+            <td><span class="bdg b-purple">${escHtml(u.role)}</span></td>
+            <td class="txt-c"><strong>${u.approvalLevel===99?'∞':u.approvalLevel}</strong></td>
+            <td class="muted-s">${u.permissions.includes('*')?'<span class="bdg b-ok">ALL (Admin)</span>':u.permissions.length+' permissions'}</td>
+            <td>${STATE.currentUser.id!==u.id?`<button class="btn btn-xs" onclick="login('${u.id}')">Login as</button>`:''}</td>
+          </tr>`).join('')}</tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-t">Approval Authority Matrix</div>
+      <table class="tbl">
+        <thead><tr><th>Role</th><th>Adjustments</th><th>Transfers</th><th>GRN</th><th>Vendor Bills</th><th>Items</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Stock Clerk</strong></td><td><span class="muted-s">Create only</span></td><td><span class="muted-s">Create only</span></td><td><span class="muted-s">Create only</span></td><td>-</td><td>-</td></tr>
+          <tr><td><strong>Warehouse Supervisor</strong></td><td><span class="bdg b-ok">L1 (&lt;5K)</span></td><td><span class="muted-s">Create only</span></td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td><strong>Inventory Manager</strong></td><td><span class="bdg b-ok">L1 + L2</span></td><td><span class="bdg b-ok">Approve</span></td><td><span class="bdg b-ok">Approve</span></td><td><span class="bdg b-ok">Approve</span></td><td><span class="bdg b-ok">L1</span></td></tr>
+          <tr><td><strong>Finance Controller</strong></td><td><span class="bdg b-ok">L1 + L2</span></td><td>-</td><td><span class="bdg b-ok">&gt;50K</span></td><td><span class="bdg b-ok">Approve</span></td><td><span class="bdg b-ok">L1</span></td></tr>
+          <tr><td><strong>CEO / Admin</strong></td><td><span class="bdg b-ok">All levels</span></td><td><span class="bdg b-ok">Override</span></td><td><span class="bdg b-ok">Override</span></td><td><span class="bdg b-ok">Override</span></td><td><span class="bdg b-ok">Override</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   CATEGORIES, UOMs, LOCATIONS, CURRENCIES, REASON CODES
+   ═══════════════════════════════════════════════════════ */
+
+function renderCategories(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Categories</div><div class="ps">Item categories with default GL account linking</div></div>
+      <div class="brow"><button class="btn btn-p" onclick="toast('Category form','ok')">+ New Category</button></div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Code</th><th>Name</th><th>Items</th><th>Default Asset</th><th>Default COGS</th><th>Default Revenue</th></tr></thead>
+        <tbody>${STATE.categories.map(c=>{
+          const a=getAccount(c.glAsset),cg=getAccount(c.glCogs),rv=getAccount(c.glRev);
+          const itemCount = STATE.items.filter(i=>i.category===c.id).length;
+          return `<tr>
+            <td class="mono"><strong>${c.code}</strong></td>
+            <td>${escHtml(c.name)}</td>
+            <td class="txt-c">${itemCount}</td>
+            <td><span class="mono">${c.glAsset}</span> ${a?escHtml(a.name):''}</td>
+            <td><span class="mono">${c.glCogs}</span> ${cg?escHtml(cg.name):''}</td>
+            <td><span class="mono">${c.glRev}</span> ${rv?escHtml(rv.name):''}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderUOMs(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Units of Measure</div><div class="ps">${STATE.uoms.length} UOMs configured</div></div>
+      <div class="brow"><button class="btn btn-p">+ New UOM</button></div>
+    </div>
+    <div class="g3">${['Quantity','Weight','Volume','Length'].map(t=>{
+      const list = STATE.uoms.filter(u=>u.type===t);
+      if(!list.length) return '';
+      return `<div class="card"><div class="card-t">${t}</div>
+        ${list.map(u=>`<div class="kv"><span class="k mono">${u.code}</span><span class="v">${escHtml(u.name)}</span></div>`).join('')}
+      </div>`;
+    }).join('')}</div>
+  `;
+}
+
+function renderBundles(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Bundles & Kits</div><div class="ps">Pre-configured item combinations</div></div>
+      <div class="brow"><button class="btn btn-p" onclick="toast('Bundle builder','ok')">+ New Bundle</button></div>
+    </div>
+    <div class="g2">${STATE.bundles.map(b=>{
+      const compCost = b.components.reduce((s,c)=>{const i=getItem(c.itemId);return s+(i?i.avgCost*c.qty:0)},0);
+      return `<div class="card">
+        <div class="card-t">${escHtml(b.name)} <span class="bdg b-info">${b.code}</span></div>
+        <div class="kv"><span class="k">Bundle Price</span><span class="v mono">${fmt(b.price)}</span></div>
+        <div class="kv"><span class="k">Component Cost</span><span class="v mono">${fmt(compCost)}</span></div>
+        <div class="kv"><span class="k">Margin</span><span class="v" style="color:${b.price>compCost?'var(--green)':'var(--red)'}">${((b.price-compCost)/b.price*100).toFixed(1)}%</span></div>
+        <div class="sep"></div>
+        <div class="lbl">Components</div>
+        ${b.components.map(c=>{const i=getItem(c.itemId);return `<div style="padding:4px 0;font-size:12px"><strong>${c.qty}x</strong> ${escHtml(i?i.name:'-')} <span class="muted-s mono">${i?i.sku:''}</span></div>`}).join('')}
+      </div>`;
+    }).join('')}</div>
+  `;
+}
+
+function renderLabels(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Label Designer</div><div class="ps">Print barcodes, prices, and shelf labels</div></div>
+      <div class="brow"><button class="btn">📄 Print Selected</button></div>
+    </div>
+    <div class="g3">${STATE.items.slice(0,9).map(i=>{
+      const cat = getCategory(i.category);
+      return `<div class="card" style="padding:14px;text-align:center;border:2px dashed var(--border2)">
+        <div style="font-size:11px;font-weight:700;margin-bottom:6px">${escHtml(i.name)}</div>
+        <div class="muted-s mono" style="font-size:10px">${i.sku}</div>
+        <div style="margin:10px 0;background:#fff;border:1px solid var(--border);padding:8px">
+          ${generateBarcodeSVG(i.barcodes[0]||i.sku, 180, 50)}
+          <div class="mono" style="font-size:10px;margin-top:3px">${escHtml(i.barcodes[0]||i.sku)}</div>
+        </div>
+        <div style="font-size:14px;font-weight:700">${fmt(i.sellPrice)}</div>
+        <div class="muted-s" style="font-size:10px">${cat?escHtml(cat.name):''}</div>
+      </div>`;
+    }).join('')}</div>
+  `;
+}
+
+function generateBarcodeSVG(text, w, h){
+  if(!text) text='000000';
+  let bars='';
+  let x=0;
+  const barWidths=[1,2,1,2,1,3,1,2,3,1,2];
+  for(let i=0;i<text.length;i++){
+    const c = text.charCodeAt(i);
+    const bw = barWidths[c%barWidths.length];
+    bars += `<rect x="${x}" y="5" width="${bw}" height="${h-15}" fill="#000"/>`;
+    x += bw + 1;
+    if(x>w-10) break;
+  }
+  return `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg"><rect width="${w}" height="${h}" fill="#fff"/>${bars}</svg>`;
+}
+
+function renderLocations(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Locations</div><div class="ps">Warehouses, branches & sublocations</div></div>
+      <div class="brow"><button class="btn btn-p">+ New Location</button></div>
+    </div>
+    <div class="g2">${STATE.locations.map(l=>{
+      const totalValue = STATE.items.reduce((s,i)=>s+((STATE.stock[i.id]||{})[l.id]||0)*i.avgCost,0);
+      return `<div class="card">
+        <div class="card-t">${escHtml(l.name)} <span class="bdg b-info">${l.code}</span></div>
+        <div class="kv"><span class="k">Type</span><span class="v">${l.type}</span></div>
+        <div class="kv"><span class="k">Address</span><span class="v">${escHtml(l.address)}</span></div>
+        <div class="kv"><span class="k">Stock Value</span><span class="v mono">${fmt(totalValue)}</span></div>
+        <div class="sep"></div>
+        <div class="lbl">Sublocations</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">${l.sublocations.map(s=>`<span class="bdg b-sub">${escHtml(s)}</span>`).join('')}</div>
+      </div>`;
+    }).join('')}</div>
+  `;
+}
+
+function renderCurrencies(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Currencies</div><div class="ps">Exchange rates · Base: MVR</div></div>
+      <div class="brow"><button class="btn">🔄 Update Rates</button></div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Code</th><th>Currency</th><th>Symbol</th><th class="txt-r">Rate to MVR</th><th>Status</th></tr></thead>
+        <tbody>${STATE.currencies.map(c=>`<tr>
+          <td class="mono"><strong>${c.code}</strong></td>
+          <td>${escHtml(c.name)}</td>
+          <td>${c.symbol}</td>
+          <td class="txt-r mono">${c.rate.toFixed(4)}</td>
+          <td>${c.base?'<span class="bdg b-info">BASE</span>':'<span class="bdg b-ok">Active</span>'}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderReasonCodes(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Reason Codes</div><div class="ps">Adjustment reasons with linked GL accounts</div></div>
+      <div class="brow"><button class="btn btn-p">+ New Reason</button></div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Code</th><th>Reason</th><th>GL Account</th><th>Account Name</th></tr></thead>
+        <tbody>${STATE.reasonCodes.map(r=>{const a=getAccount(r.glAccount);return `<tr>
+          <td class="mono"><strong>${r.code}</strong></td>
+          <td>${escHtml(r.name)}</td>
+          <td class="mono">${r.glAccount}</td>
+          <td>${a?escHtml(a.name):''}</td>
+        </tr>`}).join('')}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderCosting(){
+  const methods = {FIFO:0,LIFO:0,WAC:0,FEFO:0};
+  STATE.items.forEach(i=>methods[i.costMethod]++);
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Costing Methods</div><div class="ps">How inventory value is calculated</div></div>
+    </div>
+    <div class="g4" style="margin-bottom:14px">${Object.entries(methods).map(([m,n])=>`
+      <div class="stat"><div class="stat-l">${m}</div><div class="stat-v">${n}</div><div class="stat-s">items using ${m}</div></div>
+    `).join('')}</div>
+    <div class="g2">
+      <div class="card"><div class="card-t">FIFO — First In First Out</div>
+        <p class="muted-s">Oldest stock issued first. Reflects current cost in stock value. Good for non-perishable trading.</p></div>
+      <div class="card"><div class="card-t">LIFO — Last In First Out</div>
+        <p class="muted-s">Newest stock issued first. Tax advantages in inflation periods. Rare in modern inventory.</p></div>
+      <div class="card"><div class="card-t">WAC — Weighted Average Cost</div>
+        <p class="muted-s">All units valued at running average. Simple, smooths price fluctuations. Best for fungible items.</p></div>
+      <div class="card"><div class="card-t">FEFO — First Expire First Out</div>
+        <p class="muted-s">Earliest expiry issued first. Critical for F&B, pharma, perishables.</p></div>
+    </div>
+  `;
+}
+
+function renderCostRules(){
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Cost Absorption Rules</div><div class="ps">How freight, duty & insurance are loaded onto items</div></div>
+      <div class="brow"><button class="btn btn-p">+ New Rule</button></div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Rule Name</th><th>Method</th><th>Applies To</th><th>Freight</th><th>Duty</th><th>Insurance</th><th>Status</th></tr></thead>
+        <tbody>${STATE.costRules.map(r=>`<tr>
+          <td><strong>${escHtml(r.name)}</strong></td>
+          <td><span class="bdg b-info">${r.method}</span></td>
+          <td class="muted-s">${escHtml(r.applies)}</td>
+          <td>${r.freight?'✓':'-'}</td>
+          <td>${r.duty?'✓':'-'}</td>
+          <td>${r.insurance?'✓':'-'}</td>
+          <td><span class="bdg ${r.active?'b-ok':'b-draft'}">${r.active?'Active':'Inactive'}</span></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderReports(){
+  const reports = [
+    {t:'Stock Valuation Report',d:'Current inventory value by location, category, item',i:'💰'},
+    {t:'ABC Analysis',d:'Pareto classification of items by value',i:'📊'},
+    {t:'Slow-Moving Stock',d:'Items with low turnover ratio',i:'🐢'},
+    {t:'Stock Aging Report',d:'How long stock has been on hand',i:'📅'},
+    {t:'GRN Register',d:'All goods received with vendor and cost details',i:'📥'},
+    {t:'Adjustment Summary',d:'All adjustments by reason code and location',i:'⚙️'},
+    {t:'Transfer Log',d:'Inter-location movements summary',i:'🔄'},
+    {t:'Vendor Performance',d:'Lead time, quality, discrepancy by vendor',i:'🏪'},
+    {t:'Reorder Forecast',d:'AI-powered reorder predictions for next 30 days',i:'🤖'},
+    {t:'Expiry Forecast',d:'Items expiring in next 30/60/90 days',i:'⏰'},
+    {t:'GL Posting Summary',d:'Inventory journal entries by account',i:'💼'},
+    {t:'Audit Trail',d:'Complete approval history for all documents',i:'🔒'}
+  ];
+  $('main').innerHTML = `
+    <div class="ph">
+      <div><div class="pt">Reports</div><div class="ps">12 standard reports + AI-powered analytics</div></div>
+    </div>
+    <div class="g3">${reports.map(r=>`
+      <div class="card" style="cursor:pointer" onclick="toast('Generating: '+'${r.t}','ok')">
+        <div style="font-size:28px;margin-bottom:6px">${r.i}</div>
+        <div style="font-weight:700;margin-bottom:3px">${r.t}</div>
+        <div class="muted-s">${r.d}</div>
+      </div>
+    `).join('')}</div>
+  `;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   AI ASSISTANT — uses Anthropic API
+   ═══════════════════════════════════════════════════════ */
+
+let aiOpen = false;
+const aiHistory = [];
+
+function toggleAI(){
+  aiOpen = !aiOpen;
+  if(aiOpen){
+    $('aiPanel').style.display='flex';
+    $('aiFab').style.display='none';
+    if(!$('aiPanel').innerHTML){
+      $('aiPanel').className='ai-panel';
+      $('aiPanel').innerHTML = `
+        <div class="ai-h">
+          <div><div class="ai-h-t">✨ Inventory AI Assistant</div><div class="ai-h-s">Ask about stock, reorders, costs, anything</div></div>
+          <button class="mx" style="color:#fff" onclick="toggleAI()">×</button>
+        </div>
+        <div class="ai-msgs" id="aiMsgs">
+          <div class="ai-m a">Hi ${escHtml(STATE.currentUser.name.split(' ')[0])}! I'm your inventory AI. I can help with:<br><br>• <strong>Reorder analysis</strong> — "What should I reorder this week?"<br>• <strong>Stock queries</strong> — "How many Coke cans do we have?"<br>• <strong>Cost analysis</strong> — "Which items lost most value?"<br>• <strong>Vendor info</strong> — "Who is fastest on deliveries?"<br><br>What would you like to know?</div>
+        </div>
+        <div class="ai-in">
+          <input type="text" id="aiInput" placeholder="Ask anything..." onkeydown="if(event.key==='Enter')sendAI()">
+          <button onclick="sendAI()">Send</button>
+        </div>`;
+    }
+  } else {
+    $('aiPanel').style.display='none';
+    $('aiFab').style.display='flex';
+  }
+}
+
+function aiAddMsg(text, type){
+  const m = document.createElement('div');
+  m.className = 'ai-m '+type;
+  m.innerHTML = text;
+  $('aiMsgs').appendChild(m);
+  $('aiMsgs').scrollTop = $('aiMsgs').scrollHeight;
+}
+
+async function sendAI(){
+  const inp = $('aiInput');
+  const q = inp.value.trim();
+  if(!q) return;
+  aiAddMsg(escHtml(q),'u');
+  inp.value='';
+  aiHistory.push({role:'user',content:q});
+
+  const status = document.createElement('div');
+  status.className='ai-m s';
+  status.textContent='Thinking...';
+  $('aiMsgs').appendChild(status);
+
+  // Build inventory context
+  const ctx = buildAIContext();
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:800,
+        system:`You are an inventory management AI assistant for InventoryPro. You have access to the user's live inventory data. Be concise and practical. User is ${STATE.currentUser.name} (${STATE.currentUser.role}). Current location: ${STATE.currentLocation==='all'?'All Locations':getLocation(STATE.currentLocation).name}. Use Maldivian Rufiyaa (Rf) for currency. \n\nINVENTORY DATA:\n${ctx}`,
+        messages: aiHistory.map(m=>({role:m.role,content:m.content}))
+      })
+    });
+    const data = await res.json();
+    status.remove();
+    const reply = data.content && data.content[0] ? data.content[0].text : 'No response';
+    aiHistory.push({role:'assistant',content:reply});
+    aiAddMsg(reply.replace(/\n/g,'<br>'),'a');
+  } catch(e){
+    status.remove();
+    aiAddMsg(localAIReply(q),'a');
+  }
+}
+
+function buildAIContext(){
+  const lowStock = STATE.items.filter(i=>{const t=totalStock(i.id);return t>0&&t<=i.minStock}).map(i=>`${i.sku} ${i.name}: ${totalStock(i.id)} (min ${i.minStock})`);
+  const outOfStock = STATE.items.filter(i=>totalStock(i.id)===0).map(i=>`${i.sku} ${i.name}`);
+  const reorders = getAllReorderSuggestions().slice(0,5).map(s=>`${s.item.sku} ${s.item.name}: have ${s.currentStock}, reorder ${s.eoq}, ${s.urgency}`);
+  const pendingApr = myPendingApprovals();
+
+  return `Total items: ${STATE.items.length}
+Total stock value: Rf ${STATE.items.reduce((s,i)=>s+totalStock(i.id)*i.avgCost,0).toFixed(0)}
+Low stock items: ${lowStock.length>0?lowStock.slice(0,5).join('; '):'none'}
+Out of stock: ${outOfStock.length>0?outOfStock.slice(0,5).join('; '):'none'}
+Top reorder suggestions: ${reorders.join('; ')}
+My pending approvals: ${pendingApr}
+Locations: ${STATE.locations.map(l=>l.code).join(', ')}
+Item samples (first 5): ${STATE.items.slice(0,5).map(i=>`${i.sku} ${i.name} stock=${totalStock(i.id)} cost=Rf${i.avgCost}`).join('; ')}`;
+}
+
+function localAIReply(q){
+  const ql = q.toLowerCase();
+  if(ql.includes('reorder')||ql.includes('what should')){
+    const s = getAllReorderSuggestions();
+    if(!s.length) return 'Stock levels look healthy - no urgent reorders needed.';
+    return `Top reorder priorities:<br><br>${s.slice(0,5).map(x=>`• <strong>${escHtml(x.item.name)}</strong>: ${x.currentStock} on hand → reorder ${fmtN(x.eoq)} (${x.urgency})`).join('<br>')}<br><br>Click 🤖 AI Reorder in the sidebar for full analysis.`;
+  }
+  if(ql.includes('low stock')||ql.includes('out of stock')){
+    const low = STATE.items.filter(i=>totalStock(i.id)<=i.minStock);
+    return low.length ? `${low.length} items at or below min level:<br>${low.slice(0,8).map(i=>`• ${escHtml(i.name)}: ${totalStock(i.id)} ${i.uom}`).join('<br>')}` : 'No low stock items.';
+  }
+  if(ql.includes('expir')){
+    const exp = STATE.lots.filter(l=>daysFrom(l.expDate)<=30).sort((a,b)=>daysFrom(a.expDate)-daysFrom(b.expDate));
+    return exp.length ? `${exp.length} lots expire within 30 days:<br>${exp.slice(0,6).map(l=>`• ${l.lotNo} (${escHtml(getItem(l.itemId).name)}): ${daysFrom(l.expDate)}d left`).join('<br>')}` : 'No urgent expiries.';
+  }
+  if(ql.includes('approv')){
+    return `You have ${myPendingApprovals()} pending approvals. Click "My Approvals" in sidebar to review.`;
+  }
+  if(ql.includes('value')||ql.includes('worth')){
+    const v = STATE.items.reduce((s,i)=>s+totalStock(i.id)*i.avgCost,0);
+    return `Total inventory value: <strong>${fmt(v)}</strong> across ${STATE.items.length} items at ${STATE.locations.length} locations.`;
+  }
+  return `I can help with reorder suggestions, stock levels, expiries, approvals, and valuations. Try asking "What should I reorder?" or "Show low stock items."`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════════════════ */
+
+renderLogin();
+
+// Quality-of-life: search bar global
+document.addEventListener('DOMContentLoaded',()=>{
+  const gs = $('globalSearch');
+  if(gs) gs.addEventListener('keydown',(e)=>{
+    if(e.key==='Enter'){
+      itemSearchTerm = gs.value;
+      go('items');
+      gs.value='';
+    }
+  });
 });
-
-}
-
-/* SAMPLE DATA */
-
-tbody.rows[0].querySelector(".item").value = "Double A A4 Paper 80 GSM";
-tbody.rows[0].querySelector(".code").value = "10025";
-tbody.rows[0].querySelector(".barcode").value = "8851907100012";
-
-tbody.rows[1].querySelector(".item").value = "Double A A3 Paper";
-tbody.rows[1].querySelector(".code").value = "10026";
-tbody.rows[1].querySelector(".barcode").value = "8851907100013";
-
-/* GENERATE LABELS */
-
-function generateLabels(){
-
-const grid = document.getElementById("labelsGrid");
-grid.innerHTML = "";
-
-let rows = tbody.querySelectorAll("tr");
-
-rows.forEach((row,index)=>{
-
-let item = row.querySelector(".item").value.trim();
-let code = row.querySelector(".code").value.trim();
-let barcode = row.querySelector(".barcode").value.trim();
-
-if(item && code && barcode){
-
-let label = document.createElement("div");
-label.className = "label";
-
-label.innerHTML = `
-<div class='company'>
-ProSynergy Medical System Pvt Ltd
-</div>
-
-<div class='item'>
-${item}
-</div>
-
-<div class='barcodeArea'>
-<svg id='b${index}'></svg>
-<div class='barcodeNo'>${barcode}</div>
-</div>
-
-<div class='qr'>
-<canvas id='q${index}'></canvas>
-</div>
-`;
-
-grid.appendChild(label);
-
-/* BARCODE */
-
-JsBarcode("#b"+index, barcode,{
-format:"CODE128",
-width:1,
-height:20,
-displayValue:false,
-margin:0
-});
-
-/* CONTACT CARD QR */
-
-let vCard =
-"BEGIN:VCARD\r\n" +
-"VERSION:3.0\r\n" +
-"FN:" + item + "\r\n" +
-"ORG:ProSynergy Medical System Pvt Ltd\r\n" +
-"NOTE:Item Code : " + code + "\r\n" +
-"END:VCARD";
-
-QRCode.toCanvas(document.getElementById("q"+index), vCard,{
-width:60,
-margin:1,
-errorCorrectionLevel:"L"
-});
-
-}
-
-});
-
-}
-
-generateLabels();
 
 </script>
-
 </body>
 </html>
