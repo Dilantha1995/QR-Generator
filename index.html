@@ -416,50 +416,70 @@
     vertical-align: middle;
   }
 
-  /* ============== PRINT VIEW (15 labels per A4) ============== */
-  /* A4 = 210mm × 297mm. 15 labels = 3 cols × 5 rows.
-     Each label ≈ 63.5mm × 47.6mm (close to Avery L7163/J8163 5160 style).
-     Use 64mm × 50mm with small margins. */
-  .print-area {
-    display: none;
-  }
+  /* ============== PRINT VIEW (18 labels per A4) ============== */
+  /* A4 = 210mm × 297mm. 18 labels = 3 cols × 6 rows.
+     Each label = 63.5mm × 45mm. */
+  .print-area { display: none; }
   @media print {
     @page {
       size: A4 portrait;
       margin: 0;
     }
-    body { background: white; }
-    .app, header { display: none !important; }
+    html, body {
+      background: white !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 210mm;
+    }
+    .app, header, .print-controls, .toast, .modal-overlay { display: none !important; }
     .print-area {
       display: block !important;
       background: white;
-      width: 210mm;
-      min-height: 297mm;
-      padding: 13mm 7.25mm;
       margin: 0;
+      padding: 0;
+      width: 210mm;
+      min-height: auto;
+    }
+    .print-page {
+      width: 210mm;
+      height: 297mm;
+      padding: 13.5mm 7.25mm;
+      margin: 0;
+      box-sizing: border-box;
+      background: white;
+      box-shadow: none !important;
+      page-break-after: always;
+      page-break-inside: avoid;
+      break-after: page;
+      break-inside: avoid;
+      overflow: hidden;
+    }
+    .print-page:last-child {
+      page-break-after: auto;
+      break-after: auto;
     }
     .label-grid {
       display: grid;
       grid-template-columns: repeat(3, 63.5mm);
-      grid-template-rows: repeat(5, 50mm);
+      grid-template-rows: repeat(6, 45mm);
       column-gap: 2.5mm;
       row-gap: 0;
       width: 100%;
     }
     .label {
       width: 63.5mm;
-      height: 50mm;
-      padding: 2.5mm;
-      border: none;
+      height: 45mm;
+      padding: 2.2mm;
+      border: none !important;
       page-break-inside: avoid;
+      break-inside: avoid;
       overflow: hidden;
       display: grid;
-      grid-template-columns: 17mm 1fr;
+      grid-template-columns: 15mm 1fr;
       grid-template-rows: auto 1fr auto;
-      gap: 1.5mm;
+      gap: 1.2mm;
       box-sizing: border-box;
     }
-    .page-break { page-break-after: always; }
   }
   /* On-screen preview when "Preview" mode is on (before printing) */
   .print-preview-mode .app { display: none; }
@@ -472,31 +492,32 @@
   }
   .print-preview-mode .print-page {
     width: 210mm;
-    min-height: 297mm;
+    height: 297mm;
     background: white;
     color: #000;
     margin: 0 auto 20px;
-    padding: 13mm 7.25mm;
+    padding: 13.5mm 7.25mm;
     box-shadow: 0 6px 24px rgba(0,0,0,0.3);
     box-sizing: border-box;
+    overflow: hidden;
   }
   .print-preview-mode .label-grid {
     display: grid;
     grid-template-columns: repeat(3, 63.5mm);
-    grid-template-rows: repeat(5, 50mm);
+    grid-template-rows: repeat(6, 45mm);
     column-gap: 2.5mm;
     row-gap: 0;
   }
   .print-preview-mode .label {
     width: 63.5mm;
-    height: 50mm;
-    padding: 2.5mm;
+    height: 45mm;
+    padding: 2.2mm;
     box-sizing: border-box;
     overflow: hidden;
     display: grid;
-    grid-template-columns: 17mm 1fr;
+    grid-template-columns: 15mm 1fr;
     grid-template-rows: auto 1fr auto;
-    gap: 1.5mm;
+    gap: 1.2mm;
     border: 0.2mm dashed #ccc;
   }
   /* Label inner content */
@@ -509,8 +530,8 @@
   .label .qr-cell svg,
   .label .qr-cell img,
   .label .qr-cell canvas {
-    width: 17mm !important;
-    height: 17mm !important;
+    width: 15mm !important;
+    height: 15mm !important;
     display: block;
   }
   .label .qr-cell svg rect { shape-rendering: crispEdges; }
@@ -521,7 +542,7 @@
     overflow: hidden;
   }
   .label .info .item-name-print {
-    font-size: 8.4pt;
+    font-size: 7.5pt;
     font-weight: 700;
     line-height: 1.1;
     color: #000;
@@ -533,16 +554,16 @@
     font-family: Arial, Helvetica, sans-serif;
   }
   .label .info .brand-print {
-    font-size: 6.4pt;
+    font-size: 6pt;
     color: #555;
-    margin-top: 0.5mm;
+    margin-top: 0.4mm;
     font-family: Arial, Helvetica, sans-serif;
   }
   .label .info .code-print {
-    font-size: 6.4pt;
+    font-size: 6pt;
     color: #888;
     font-family: 'Courier New', monospace;
-    margin-top: 0.3mm;
+    margin-top: 0.2mm;
   }
   .label .barcode-cell {
     grid-column: 1 / 3;
@@ -550,13 +571,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 11mm;
+    height: 9mm;
     overflow: hidden;
   }
   .label .barcode-cell svg {
     width: 100%;
     height: 100%;
-    max-height: 11mm;
+    max-height: 9mm;
   }
   .print-controls {
     position: fixed;
@@ -582,7 +603,7 @@
   <header>
     <div>
       <h1>Inventory <span>Label</span> Generator</h1>
-      <div class="subtitle">QR + Barcode labels, 15 per A4 sheet</div>
+      <div class="subtitle">QR + Barcode labels, 18 per A4 sheet</div>
     </div>
     <div class="header-stats">
       <div>Catalog: <b id="totalItems">0</b> items</div>
@@ -2977,6 +2998,7 @@ var qrcode = function() {
 
 <script>
 /* ============== STATE ============== */
+const LABELS_PER_PAGE = 18;  // 3 cols × 6 rows on A4
 const INVENTORY = JSON.parse(document.getElementById('inventoryData').textContent);
 let customItems = [];
 let cart = [];
@@ -3147,7 +3169,7 @@ function renderCart() {
     `).join('');
   }
   const totalLabels = cart.reduce((s, c) => s + c.qty, 0);
-  const sheets = Math.ceil(totalLabels / 15);
+  const sheets = Math.ceil(totalLabels / LABELS_PER_PAGE);
   document.getElementById('cartCount').textContent = cart.length;
   document.getElementById('totalLabels').textContent = totalLabels;
   document.getElementById('sheetsNeeded').textContent = sheets;
@@ -3204,22 +3226,29 @@ function saveNewItem() {
 }
 
 /* ============== PRINT VIEW ============== */
-function buildVCard(item) {
-  // vCard 3.0 — when a phone scans it, it offers to save as contact
-  const name = (item.n || '').replace(/\n/g, ' ').replace(/;/g, ',');
-  const code = (item.c || '').replace(/;/g, ',');
-  const brand = (item.b || '').replace(/;/g, ',');
-  // FN = formatted name shown in contact card. We pack item info into the visible name and notes.
+function buildQrPayload(item) {
+  // vCard 3.0 format — universally recognized by phone cameras (iPhone, Android,
+  // Google Lens, all major scanner apps). On scan, the phone shows a clean
+  // contact-style card with the inventory details. The user can dismiss the
+  // card without saving — it's purely a display vehicle.
+  // We pack the inventory data into visible vCard fields:
+  //   FN  → shown as the big bold name        → Item Name
+  //   ORG → shown as the "company"            → Brand
+  //   TITLE → shown as the "job title"        → Item Code
+  //   NOTE → shown as additional notes        → all three combined for copy/paste
+  const name = (item.n || '').replace(/[\r\n;,]/g, ' ').trim();
+  const code = (item.c || '').replace(/[\r\n;,]/g, ' ').trim();
+  const brand = (item.b || '').replace(/[\r\n;,]/g, ' ').trim();
   return [
     'BEGIN:VCARD',
     'VERSION:3.0',
-    `FN:${name}`,
     `N:${name};;;;`,
+    `FN:${name}`,
     `ORG:${brand}`,
-    `TITLE:Item Code: ${code}`,
-    `NOTE:Item: ${name}\\nCode: ${code}\\nBrand: ${brand}`,
+    `TITLE:Code ${code}`,
+    `NOTE:${name} | Code: ${code} | Brand: ${brand}`,
     'END:VCARD'
-  ].join('\n');
+  ].join('\r\n');
 }
 
 function generatePrintView(previewOnly) {
@@ -3245,31 +3274,58 @@ function generatePrintView(previewOnly) {
       for (let i = 0; i < c.qty; i++) labels.push(fullItem);
     });
 
-    // Build pages of 15
+    // Build pages of LABELS_PER_PAGE per sheet
     const printArea = document.getElementById('printArea');
     printArea.innerHTML = '';
-    const pages = Math.ceil(labels.length / 15);
+    const pages = Math.ceil(labels.length / LABELS_PER_PAGE);
+
+    // Track which labels need QR/barcode rendering, with the actual data
+    // (avoid putting data in HTML attributes — newlines get mangled by the parser)
+    const qrJobs = [];
+    const barcodeJobs = [];
 
     for (let p = 0; p < pages; p++) {
       const page = document.createElement('div');
-      page.className = 'print-page' + (p < pages - 1 ? ' page-break' : '');
+      page.className = 'print-page';
       const grid = document.createElement('div');
       grid.className = 'label-grid';
-      for (let i = 0; i < 15; i++) {
+      for (let i = 0; i < LABELS_PER_PAGE; i++) {
         const labelDiv = document.createElement('div');
         labelDiv.className = 'label';
-        const idx = p * 15 + i;
+        const idx = p * LABELS_PER_PAGE + i;
         if (idx < labels.length) {
           const item = labels[idx];
-          labelDiv.innerHTML = `
-            <div class="qr-cell" data-qr="${escapeAttr(buildVCard(item))}"></div>
-            <div class="info">
-              <div class="item-name-print">${escapeHtml(item.n)}</div>
-              <div class="brand-print">${escapeHtml(item.b)}</div>
-              <div class="code-print">${escapeHtml(item.c)}</div>
-            </div>
-            <div class="barcode-cell"><svg data-barcode="${escapeAttr(item.c)}"></svg></div>
-          `;
+
+          const qrCell = document.createElement('div');
+          qrCell.className = 'qr-cell';
+
+          const info = document.createElement('div');
+          info.className = 'info';
+          const nameDiv = document.createElement('div');
+          nameDiv.className = 'item-name-print';
+          nameDiv.textContent = item.n;
+          const brandDiv = document.createElement('div');
+          brandDiv.className = 'brand-print';
+          brandDiv.textContent = item.b;
+          const codeDiv = document.createElement('div');
+          codeDiv.className = 'code-print';
+          codeDiv.textContent = item.c;
+          info.appendChild(nameDiv);
+          info.appendChild(brandDiv);
+          info.appendChild(codeDiv);
+
+          const barcodeCell = document.createElement('div');
+          barcodeCell.className = 'barcode-cell';
+          const barcodeSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          barcodeCell.appendChild(barcodeSvg);
+
+          labelDiv.appendChild(qrCell);
+          labelDiv.appendChild(info);
+          labelDiv.appendChild(barcodeCell);
+
+          // Queue the rendering jobs with direct element + data references
+          qrJobs.push({ cell: qrCell, data: buildQrPayload(item) });
+          barcodeJobs.push({ svg: barcodeSvg, code: item.c });
         }
         grid.appendChild(labelDiv);
       }
@@ -3277,46 +3333,44 @@ function generatePrintView(previewOnly) {
       printArea.appendChild(page);
     }
 
-    // Render all QR codes (vCard contact)
+    // Render all QR codes
     let qrCount = 0;
-    printArea.querySelectorAll('.qr-cell[data-qr]').forEach(cell => {
-      const data = cell.getAttribute('data-qr');
+    qrJobs.forEach(job => {
       try {
-        // qrcode-generator: auto type size (0), error correction M
+        // qrcode-generator: auto version (0), error correction M
         const qr = qrcode(0, 'M');
-        qr.addData(data);
+        qr.addData(job.data);
         qr.make();
-        cell.innerHTML = qr.createSvgTag({ scalable: true, margin: 1 });
-        const svg = cell.querySelector('svg');
+        job.cell.innerHTML = qr.createSvgTag({ scalable: true, margin: 1 });
+        const svg = job.cell.querySelector('svg');
         if (svg) {
-          svg.setAttribute('width', '17mm');
-          svg.setAttribute('height', '17mm');
-          svg.style.width = '17mm';
-          svg.style.height = '17mm';
+          svg.setAttribute('width', '100%');
+          svg.setAttribute('height', '100%');
+          svg.style.width = '100%';
+          svg.style.height = '100%';
         }
         qrCount++;
       } catch (e) {
-        console.error('QR render error:', e, data);
+        console.error('QR render error:', e, job.data);
       }
     });
 
     // Render all barcodes (Code128)
     let bcCount = 0;
-    printArea.querySelectorAll('svg[data-barcode]').forEach(svg => {
-      const code = svg.getAttribute('data-barcode');
+    barcodeJobs.forEach(job => {
       try {
-        JsBarcode(svg, code, {
+        JsBarcode(job.svg, job.code, {
           format: 'CODE128',
           width: 1.4,
-          height: 36,
+          height: 30,
           displayValue: true,
-          fontSize: 10,
+          fontSize: 9,
           margin: 0,
           textMargin: 1
         });
         bcCount++;
       } catch (e) {
-        console.error('Barcode error:', code, e);
+        console.error('Barcode error:', job.code, e);
       }
     });
 
