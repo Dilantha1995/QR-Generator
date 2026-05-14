@@ -691,11 +691,11 @@
 
 
 /* Combined-build layout fix for labels page */
-#labelsPage > .panel { display: inline-block; vertical-align: top; }
-#labelsPage { display: grid !important; grid-template-columns: 1fr 420px; gap: 20px; }
-#labelsPage > .panel { width: 100%; display: block; }
+#labelsPage { display: grid; grid-template-columns: 1fr 420px; gap: 20px; }
+#labelsPage.hidden { display: none; }
+#disposalPage.hidden { display: none; }
 @media (max-width: 900px) {
-  #labelsPage { grid-template-columns: 1fr !important; }
+  #labelsPage { grid-template-columns: 1fr; }
 }
 
 
@@ -1199,7 +1199,7 @@
   <!-- ================================ -->
   <!-- LABEL GENERATOR PAGE             -->
   <!-- ================================ -->
-  <div id="labelsPage" class="page-content" style="display:none;">
+  <div id="labelsPage" class="page-content hidden">
 
 
 
@@ -24377,9 +24377,11 @@ async function generatePdfBytes() {
     const scale = A4_W / lh.width;
     const w = A4_W, h = lh.height * scale;
     p.drawImage(lh, { x: 0, y: A4_H - h, width: w, height: h });
+    pages.push(p);
     return p;
   }
 
+  const pages = [];
   let page = newPage();
   let y = 670;
 
@@ -24443,7 +24445,7 @@ async function generatePdfBytes() {
   // Section 2
   sectionTitle('2. Items for Disposal');
   const headers = ['#', 'Description', 'Asset/Serial', 'SKU/Part', 'Qty', 'Cond.', 'Method'];
-  const widths = [22, 170, 90, 65, 30, 50, 68];
+  const widths = [22, 140, 75, 60, 28, 50, 120];
   // Header bg
   page.drawRectangle({ x: ML, y: y - 4, width: CW, height: 16, color: rgb(0.93, 0.95, 0.99) });
   let cx = ML;
@@ -24458,7 +24460,10 @@ async function generatePdfBytes() {
     const it = form.items[i] || { description: '', asset_tag: '', sku: '', qty: '', condition: '', method_code: '' };
     page.drawLine({ start: { x: ML, y }, end: { x: A4_W - MR, y }, thickness: 0.3, color: rgb(0.8, 0.8, 0.8) });
     cx = ML;
-    const vals = [String(i + 1), it.description, it.asset_tag, it.sku, it.qty, it.condition, it.method_code];
+    // Expand short code to long form (e.g. "SC" -> "Scrap / Recycle")
+    const methodEntry = DISPOSAL_METHODS.find(m => m.code === it.method_code);
+    const methodText = methodEntry ? methodEntry.label : (it.method_code || '');
+    const vals = [String(i + 1), it.description, it.asset_tag, it.sku, it.qty, it.condition, methodText];
     vals.forEach((v, j) => {
       const lines = wrap(v, font, 8.5, widths[j] - 6);
       lines.slice(0, 2).forEach((ln, k) => drawText(ln, cx + 3, y - 10 - k * 9, 8.5, font));
@@ -24531,7 +24536,7 @@ async function generatePdfBytes() {
   const sw = CW / 2, sh = 60;
   for (let i = 0; i < sigs.length; i += 2) {
     // Check space; if not enough, start new page
-    if (y - sh < 50) { page = newPage(); y = 670; sectionTitle('6. Approvals & Signatures (cont.)'); }
+    if (y - sh < 120) { page = newPage(); y = 670; sectionTitle('6. Approvals & Signatures (cont.)'); }
     let sx = ML;
     for (let j = 0; j < 2; j++) {
       const b = sigs[i + j];
@@ -24546,6 +24551,18 @@ async function generatePdfBytes() {
     }
     y -= sh + 8;
   }
+
+  // Stamp page numbers and ref no on every page
+  const total = pages.length;
+  pages.forEach((p, idx) => {
+    const pageNumStr = `Page ${idx + 1} of ${total}`;
+    const refStr = form.ref_no || '';
+    const fy = 95; // y-position above the green letterhead band so text isn't obscured
+    // Left: ref no, right: page number
+    p.drawText(refStr, { x: ML, y: fy, size: 8, font: bold, color: rgb(0.35, 0.35, 0.35) });
+    const pw = font.widthOfTextAtSize(pageNumStr, 8);
+    p.drawText(pageNumStr, { x: A4_W - MR - pw, y: fy, size: 8, font, color: rgb(0.35, 0.35, 0.35) });
+  });
 
   return await pdf.save();
 }
@@ -24625,8 +24642,10 @@ async function generateDocxBlob() {
   const itemRows = [];
   for (let i = 0; i < 8; i++) {
     const it = form.items[i] || { description: '', asset_tag: '', sku: '', qty: '', condition: '', method_code: '' };
+    const methodEntry = DISPOSAL_METHODS.find(m => m.code === it.method_code);
+    const methodText = methodEntry ? methodEntry.label : (it.method_code || '');
     itemRows.push(new D.TableRow({
-      children: [String(i+1), it.description||' ', it.asset_tag||' ', it.sku||' ', it.qty||' ', it.condition||' ', it.method_code||' '].map(v =>
+      children: [String(i+1), it.description||' ', it.asset_tag||' ', it.sku||' ', it.qty||' ', it.condition||' ', methodText||' '].map(v =>
         new D.TableCell({ children: [new D.Paragraph({ children: [new D.TextRun({ text: v, size: 18 })] })] })
       ),
     }));
@@ -24752,6 +24771,18 @@ async function generateDocxBlob() {
     transformation: { width: 595, height: 80 },
   });
 
+  // Footer with ref no on left and "Page X of Y" on right
+  const footerParagraph = new D.Paragraph({
+    alignment: D.AlignmentType.CENTER,
+    children: [
+      new D.TextRun({ text: form.ref_no || '', size: 16, color: '888888' }),
+      new D.TextRun({ text: '          Page ', size: 16, color: '888888' }),
+      new D.TextRun({ children: [D.PageNumber.CURRENT], size: 16, color: '888888' }),
+      new D.TextRun({ text: ' of ', size: 16, color: '888888' }),
+      new D.TextRun({ children: [D.PageNumber.TOTAL_PAGES], size: 16, color: '888888' }),
+    ],
+  });
+
   const doc = new D.Document({
     sections: [{
       properties: {
@@ -24761,6 +24792,7 @@ async function generateDocxBlob() {
         },
       },
       headers: { default: new D.Header({ children: [new D.Paragraph({ children: [headerImg] })] }) },
+      footers: { default: new D.Footer({ children: [footerParagraph] }) },
       children,
     }],
   });
@@ -24795,8 +24827,8 @@ async function downloadDocx(skipSave) {
 
 /* ============== TAB SWITCHING ============== */
 function switchTab(tab) {
-  document.getElementById('disposalPage').style.display = tab === 'disposal' ? '' : 'none';
-  document.getElementById('labelsPage').style.display   = tab === 'labels'   ? '' : 'none';
+  document.getElementById('disposalPage').classList.toggle('hidden', tab !== 'disposal');
+  document.getElementById('labelsPage').classList.toggle('hidden', tab !== 'labels');
   document.querySelectorAll('.tab-btn').forEach(b => {
     b.classList.toggle('active', b.getAttribute('data-tab') === tab);
   });
