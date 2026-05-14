@@ -1279,7 +1279,7 @@
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeAddItemModal()">Cancel</button>
-      <button class="btn" onclick="saveNewItem()">Add &amp; Queue</button>
+      <button class="btn" onclick="saveNewLabelItem()">Add &amp; Queue</button>
     </div>
   </div>
 </div>
@@ -25365,6 +25365,21 @@ if (false) ((function _noop() { /* DOMContentLoaded handler stripped from combin
     document.body.insertBefore(banner, document.body.firstChild);
   }
 }))();
+
+// Expose label-tool functions to window so inline onclick handlers can reach them.
+// NOTE: `saveNewItem` is exposed as `saveNewLabelItem` to avoid colliding with
+// the disposal-form's own saveNewItem (defined outside this IIFE).
+window.openAddItemModal  = openAddItemModal;
+window.closeAddItemModal = closeAddItemModal;
+window.saveNewLabelItem  = saveNewItem;
+window.prefillAndAdd     = prefillAndAdd;
+window.addToCart         = addToCart;
+window.changeQty         = changeQty;
+window.removeFromCart    = removeFromCart;
+window.generatePrintView = generatePrintView;
+window.closePrintView    = closePrintView;
+window.clearCart         = clearCart;
+window.toggleCutMarks    = toggleCutMarks;
 
 window.__labelsInit = function() {
   updateStats();
