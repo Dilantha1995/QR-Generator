@@ -715,8 +715,9 @@
     letter-spacing: 0.5px;
     margin-bottom: 12px;
   }
-  .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
   .section-head h2 { margin-bottom: 0; }
+  .section-head-btns { display: flex; gap: 6px; flex-wrap: wrap; }
 
   /* Company picker */
   .company-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
@@ -754,6 +755,17 @@
   .field input:focus, .field select:focus, .field textarea:focus, .ref-row input:focus { border-color: var(--accent); }
   .field textarea { resize: vertical; min-height: 80px; }
   .ref-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .ref-qr-wrap { display: flex; flex-direction: column; justify-content: center; align-items: center; }
+  .ref-qr {
+    width: 100px; height: 100px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ref-qr svg { width: 100%; height: 100%; display: block; }
+  .ref-qr-empty { font-size: 10px; color: #999; text-align: center; padding: 4px; line-height: 1.3; }
   .ref-display { display: flex; gap: 8px; }
   .ref-display input {
     flex: 1;
@@ -851,6 +863,108 @@
     flex-wrap: wrap;
   }
   .sp-actions-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Bulk add modal */
+  .bulk-toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin: 12px 0 8px;
+  }
+  .bulk-counter {
+    background: var(--panel-2);
+    color: var(--accent);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .bulk-toolbar-2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+  .bulk-select-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .bulk-select-all input { accent-color: var(--accent); width: 16px; height: 16px; }
+  .bulk-results { max-height: 50vh; overflow-y: auto; }
+  .bulk-row {
+    display: grid;
+    grid-template-columns: 28px 90px 1fr 120px;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .bulk-row:hover { background: var(--panel-2); }
+  .bulk-row.selected { background: rgba(94,234,212,0.08); }
+  .bulk-row input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .bulk-row .b-code {
+    font-family: 'Courier New', monospace;
+    color: var(--accent-2);
+    font-size: 11px;
+  }
+  .bulk-row .b-brand {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  /* Catalog manager */
+  .cat-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin: 12px 0; }
+  .cat-tab {
+    background: transparent; border: none;
+    color: var(--muted);
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .cat-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .cat-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 110px auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .cat-row .c-code { font-family: 'Courier New', monospace; color: var(--accent-2); font-size: 11px; }
+  .cat-row .c-brand { font-size: 11px; color: var(--muted); text-align: right; }
+  .cat-row .c-actions { display: flex; gap: 4px; }
+  .cat-row .c-actions button { padding: 4px 8px; font-size: 11px; }
+  .cat-edit input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 5px 7px;
+    font-size: 12px;
+    border-radius: 4px;
+    font-family: inherit;
+  }
+  .cat-empty { padding: 30px; text-align: center; color: var(--muted); font-size: 13px; }
   .link {
     background: none;
     border: none;
@@ -1000,6 +1114,28 @@
   .modal-foot { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
   .new-form .field { margin-bottom: 12px; }
 
+  /* History filters */
+  .history-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 10px 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 6px;
+  }
+  .history-filters input, .history-filters select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+    font-family: inherit;
+  }
+  .history-filters input[type="date"] { min-width: 130px; }
+  .history-filters #histSearch { flex: 1 1 200px; }
+
   /* History list */
   .history-list { max-height: 60vh; overflow-y: auto; }
   .history-row {
@@ -1082,6 +1218,314 @@
     margin-right: 6px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Mobile field labels (hidden on desktop, shown inside mobile media query) */
+  .field-label { display: none; }
+
+  /* Reports page */
+  #reportsPage { display: block; }
+  #reportsPage.hidden { display: none; }
+  .reports-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .stat-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--accent); }
+  .reports-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+  .chart-bars { display: flex; flex-direction: column; gap: 8px; padding-top: 6px; }
+  .chart-bar-row {
+    display: grid;
+    grid-template-columns: 110px 1fr 60px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .chart-bar-row .cb-label { color: var(--muted); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chart-bar-row .cb-track {
+    background: var(--bg);
+    border-radius: 4px;
+    height: 18px;
+    overflow: hidden;
+    position: relative;
+  }
+  .chart-bar-row .cb-fill {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease-out;
+    min-width: 2px;
+  }
+  .chart-bar-row .cb-val { color: var(--text); font-weight: 600; text-align: left; }
+  .chart-list { display: flex; flex-direction: column; }
+  .chart-list-row {
+    display: grid;
+    grid-template-columns: 24px 1fr 60px;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .chart-list-row:last-child { border-bottom: none; }
+  .chart-list-row .cl-rank { color: var(--muted); font-family: 'Courier New', monospace; font-size: 11px; text-align: right; }
+  .chart-list-row .cl-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chart-list-row .cl-count { color: var(--accent); font-weight: 700; text-align: right; }
+  .chart-empty { padding: 30px; text-align: center; color: var(--muted); font-size: 13px; }
+
+  /* ====================================================================
+     MOBILE / TABLET RESPONSIVE
+     ==================================================================== */
+
+  /* Tablet (≤ 1024px) */
+  @media (max-width: 1024px) {
+    .app { padding: 14px; }
+    .panel { padding: 16px; }
+    .header-actions { gap: 6px; }
+    .header-actions .btn { padding: 7px 10px; font-size: 12px; }
+  }
+
+  /* Phone / small tablet (≤ 760px) */
+  @media (max-width: 760px) {
+    body { line-height: 1.45; }
+    .app { padding: 10px; }
+    header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+    }
+    header h1 { font-size: 19px; }
+    header .subtitle { font-size: 12px; }
+    .header-actions {
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-start;
+    }
+    .header-actions .btn {
+      flex: 1 1 calc(50% - 6px);
+      min-width: 0;
+      padding: 9px 8px;
+      font-size: 12px;
+      justify-content: center;
+    }
+
+    /* Tab nav: horizontally scrollable, no edge clipping */
+    .tab-nav {
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn { padding: 10px 12px; font-size: 13px; flex-shrink: 0; }
+
+    .panel { padding: 14px 12px; border-radius: 10px; margin-bottom: 14px; }
+    .panel h2 { font-size: 15px; }
+    .section-head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .section-head .btn { width: 100%; justify-content: center; }
+    .section-head > h2 { width: 100%; }
+
+    /* Stack 2-col field grids on mobile */
+    .grid-2 { grid-template-columns: 1fr; gap: 10px; }
+
+    /* Company picker: stack */
+    .company-picker { grid-template-columns: 1fr; gap: 10px; }
+    .company-card { padding: 12px; }
+
+    /* Items table → card layout */
+    .items-head { display: none; }
+    .items-table { gap: 10px; }
+    .items-row, .items-row.spare-row {
+      display: grid !important;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--panel-2);
+      position: relative;
+    }
+    .items-row .row-idx, .items-row.spare-row .row-idx {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      font-size: 12px;
+      background: var(--accent);
+      color: #0a0e14;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+    }
+    .items-row .row-remove, .items-row.spare-row .row-remove {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 20px;
+      padding: 2px 8px;
+    }
+    .items-row .row-desc, .items-row.spare-row .row-desc {
+      margin-top: 28px;
+    }
+    /* Field-label badges on mobile (auto-inserted by JS) */
+    .field-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--muted);
+      margin-bottom: 3px;
+      display: block;
+    }
+    .items-row input, .items-row select,
+    .items-row.spare-row input {
+      font-size: 14px !important;   /* prevent iOS zoom on focus */
+      padding: 10px 12px !important;
+      width: 100% !important;
+    }
+    .row-desc input { font-size: 14px !important; padding: 10px 12px !important; }
+
+    /* Spare-parts actions: full-width stack */
+    .sp-actions { flex-direction: column; align-items: stretch; }
+    .sp-actions-btns { flex-direction: column; }
+    .sp-actions-btns .btn { width: 100%; justify-content: center; }
+    .sp-toggle { width: 100%; padding: 8px 0; }
+
+    /* Reasons: single column */
+    .reasons-grid { grid-template-columns: 1fr; gap: 6px; }
+    .reason-pill { padding: 10px 12px; }
+
+    /* Signatures: stack each row */
+    .sig-row {
+      grid-template-columns: 1fr 36px;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--panel-2);
+      margin-bottom: 10px;
+    }
+    .sig-row .field:first-child { grid-column: 1 / 2; }
+    .sig-row .field:nth-child(2) { grid-column: 1 / 2; }
+    .sig-row .row-remove {
+      grid-column: 2 / 3;
+      grid-row: 1 / 3;
+      align-self: start;
+      margin-top: 4px;
+    }
+    .sig-row input { font-size: 14px; padding: 10px 12px; }
+
+    /* Action bar: full-width stacked buttons */
+    .action-bar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      padding: 12px;
+      bottom: 0;
+      border-radius: 12px 12px 0 0;
+    }
+    .action-bar-buttons {
+      flex-direction: column;
+      width: 100%;
+      gap: 8px;
+    }
+    .action-bar-buttons .btn { width: 100%; justify-content: center; padding: 12px 14px; font-size: 14px; }
+    .status { width: 100%; }
+
+    /* Modals → near-fullscreen */
+    .modal-overlay { padding: 0; align-items: stretch; }
+    .modal {
+      max-width: 100%;
+      width: 100%;
+      max-height: 100vh;
+      height: 100%;
+      border-radius: 0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-results { flex: 1; max-height: none; }
+    .modal-search { font-size: 14px; padding: 12px; }
+    .result-row {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: 12px;
+      align-items: flex-start;
+    }
+    .r-brand { text-align: left; }
+    .modal-foot { flex-direction: column; gap: 8px; }
+    .modal-foot .btn { width: 100%; justify-content: center; }
+
+    /* History rows: stack */
+    .history-row {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: 14px 12px;
+    }
+    .h-actions { flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .h-actions .btn { flex: 1 1 calc(50% - 6px); min-width: 0; }
+
+    /* Bulk add modal: stack toolbars and adjust rows */
+    .bulk-toolbar { flex-direction: column; align-items: stretch; }
+    .bulk-row {
+      grid-template-columns: 28px 1fr;
+      grid-template-rows: auto auto;
+      gap: 4px 10px;
+      padding: 12px 10px;
+    }
+    .bulk-row .b-code { grid-row: 1; grid-column: 2; }
+    .bulk-row .b-name { grid-row: 2; grid-column: 2; font-weight: 500; }
+    .bulk-row .b-brand { grid-row: 3; grid-column: 2; text-align: left; }
+
+    /* Catalog manager rows stack on mobile */
+    .cat-row {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: 12px 8px;
+    }
+    .cat-row .c-brand { text-align: left; }
+    .cat-row .c-actions { margin-top: 6px; }
+
+    /* Reports: stack 2-col, smaller stat-grid */
+    .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .stat-card { padding: 12px; }
+    .stat-value { font-size: 22px; }
+    .reports-2col { grid-template-columns: 1fr; gap: 14px; }
+    .chart-bar-row { grid-template-columns: 90px 1fr 44px; font-size: 11px; gap: 6px; }
+    .reports-head { flex-direction: column; align-items: stretch; }
+
+    /* Settings menu: drop to fixed bottom sheet */
+    .settings-menu {
+      position: fixed;
+      top: auto;
+      right: 10px;
+      left: 10px;
+      bottom: 80px;
+      max-width: none;
+    }
+  }
+
+  /* Touch targets across the board (any pointer:coarse) */
+  @media (pointer: coarse) {
+    .btn, .tab-btn, .reason-pill, .company-card { min-height: 40px; }
+    .row-remove { padding: 6px 10px; min-width: 36px; min-height: 36px; }
+    input[type="checkbox"], input[type="radio"] { transform: scale(1.15); }
+  }
 </style>
 </head>
 <body>
@@ -1098,6 +1542,8 @@
       <button class="btn btn-secondary disposal-only" onclick="toggleSettingsMenu(event)">⚙️ Settings</button>
       <div class="settings-menu" id="settingsMenu" onclick="event.stopPropagation()">
         <button onclick="setStartingNumber()">Set last-used ref number…</button>
+        <button onclick="openCatalogManager('items')">Manage custom items…</button>
+        <button onclick="openCatalogManager('spare_parts')">Manage spare parts catalog…</button>
         <button onclick="exportAllData()">Export all data (backup)</button>
         <button onclick="importData()">Import data (restore backup)</button>
         <button onclick="resetEverything()">⚠ Reset everything</button>
@@ -1109,6 +1555,7 @@
   <div class="tab-nav">
     <button class="tab-btn active" data-tab="disposal" onclick="switchTab('disposal')">📋 Disposal Form</button>
     <button class="tab-btn" data-tab="labels" onclick="switchTab('labels')">🏷️ Label Generator</button>
+    <button class="tab-btn" data-tab="reports" onclick="switchTab('reports')">📊 Reports</button>
   </div>
 
   <!-- ================================ -->
@@ -1146,6 +1593,12 @@
         </div>
         <div class="small" style="margin-top: 4px;">You can also type a ref number manually (e.g. for an existing one)</div>
       </div>
+      <div class="ref-qr-wrap">
+        <div id="refQrPreview" class="ref-qr">
+          <div class="ref-qr-empty">QR appears once ref number is set</div>
+        </div>
+        <div class="small" style="margin-top: 4px; text-align:center;">Scan to capture ref</div>
+      </div>
       <div class="field">
         <label>Form Date</label>
         <input type="date" id="formDate">
@@ -1168,7 +1621,10 @@
   <div class="panel">
     <div class="section-head">
       <h2>2. Items for Disposal</h2>
-      <button class="btn btn-secondary" onclick="addItemRow()" id="addRowBtn">+ Add Row (<span id="rowCount">0</span>/8)</button>
+      <div class="section-head-btns">
+        <button class="btn btn-secondary" onclick="openBulkAddModal('items')">≡ Bulk add…</button>
+        <button class="btn btn-secondary" onclick="addItemRow()" id="addRowBtn">+ Add Row (<span id="rowCount">0</span>/30)</button>
+      </div>
     </div>
     <div class="items-table">
       <div class="items-head">
@@ -1213,6 +1669,7 @@
       <div class="sp-actions">
         <span class="small">Pick from your spare-parts catalog, or register a new one.</span>
         <div class="sp-actions-btns">
+          <button class="btn btn-secondary" onclick="openBulkAddModal('spare_parts')">≡ Bulk add…</button>
           <button class="btn btn-secondary" onclick="addSparePartRow()">+ Add Row</button>
           <button class="btn btn-secondary" onclick="openNewSparePartModal()">+ Register New Spare Part</button>
         </div>
@@ -1352,6 +1809,54 @@
 
   </div><!-- /#labelsPage -->
 
+  <!-- ================================ -->
+  <!-- REPORTS PAGE                    -->
+  <!-- ================================ -->
+  <div id="reportsPage" class="page-content hidden">
+    <div class="reports-head">
+      <div>
+        <h2 style="font-size:18px;margin-bottom:4px;">Disposal Analytics</h2>
+        <div class="small">Computed from your saved forms (kept locally in this browser).</div>
+      </div>
+      <button class="btn btn-secondary" onclick="renderReports()">↻ Refresh</button>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-label">Total forms saved</div><div class="stat-value" id="statTotalForms">0</div></div>
+      <div class="stat-card"><div class="stat-label">Items disposed</div><div class="stat-value" id="statTotalItems">0</div></div>
+      <div class="stat-card"><div class="stat-label">Spare parts salvaged</div><div class="stat-value" id="statTotalSpare">0</div></div>
+      <div class="stat-card"><div class="stat-label">This month</div><div class="stat-value" id="statThisMonth">0</div></div>
+    </div>
+
+    <div class="panel">
+      <h2>Disposals by month <span class="small" style="font-weight:400;color:var(--muted);margin-left:6px;">(last 12 months)</span></h2>
+      <div id="chartByMonth" class="chart-bars"></div>
+    </div>
+
+    <div class="reports-2col">
+      <div class="panel">
+        <h2>By company</h2>
+        <div id="chartByCompany" class="chart-bars"></div>
+      </div>
+      <div class="panel">
+        <h2>By reason</h2>
+        <div id="chartByReason" class="chart-bars"></div>
+      </div>
+    </div>
+
+    <div class="reports-2col">
+      <div class="panel">
+        <h2>Top disposed items</h2>
+        <div id="chartTopItems" class="chart-list"></div>
+      </div>
+      <div class="panel">
+        <h2>Top spare parts salvaged</h2>
+        <div id="chartTopSpare" class="chart-list"></div>
+      </div>
+    </div>
+
+  </div><!-- /#reportsPage -->
+
 </div>
 
 <!-- Item search modal -->
@@ -1405,6 +1910,55 @@
   </div>
 </div>
 
+<!-- Catalog manager modal -->
+<div class="modal-overlay" id="catalogModal">
+  <div class="modal" style="max-width: 800px;">
+    <div class="modal-head">
+      <h3 id="catalogTitle">Manage Catalog</h3>
+      <button class="close-x" onclick="closeCatalogManager()">×</button>
+    </div>
+    <div class="cat-tabs">
+      <button class="cat-tab active" data-cat-mode="items" onclick="switchCatalogMode('items')">Custom Items <span id="catItemCount">(0)</span></button>
+      <button class="cat-tab" data-cat-mode="spare_parts" onclick="switchCatalogMode('spare_parts')">Spare Parts <span id="catSpareCount">(0)</span></button>
+    </div>
+    <input class="modal-search" id="catSearchInput" placeholder="Search catalog…" autocomplete="off">
+    <div class="modal-results" id="catalogResults"></div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeCatalogManager()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk-add modal (shared for items + spare parts) -->
+<div class="modal-overlay" id="bulkAddModal">
+  <div class="modal" style="max-width: 800px;">
+    <div class="modal-head">
+      <h3 id="bulkAddTitle">Bulk Add Items</h3>
+      <button class="close-x" onclick="closeBulkAddModal()">×</button>
+    </div>
+    <div class="bulk-toolbar">
+      <input class="modal-search" id="bulkSearchInput" placeholder="Search by code, name, or brand…" autocomplete="off" style="flex:1;">
+      <div class="bulk-counter">
+        <span id="bulkSelectedCount">0</span> selected
+      </div>
+    </div>
+    <div class="bulk-toolbar-2">
+      <label class="bulk-select-all">
+        <input type="checkbox" id="bulkSelectAll" onchange="toggleBulkSelectAll(this.checked)">
+        <span>Select all (filtered)</span>
+      </label>
+      <button class="link" onclick="clearBulkSelection()">Clear selection</button>
+    </div>
+    <div class="modal-results bulk-results" id="bulkResults"></div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeBulkAddModal()">Cancel</button>
+      <button class="btn btn-large" id="bulkAddBtn" onclick="addSelectedBulkItems()" disabled>
+        Add <span id="bulkAddBtnCount">0</span> to form
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- New spare part modal -->
 <div class="modal-overlay" id="newSparePartModal">
   <div class="modal">
@@ -1431,8 +1985,32 @@
       <h3>Saved Forms</h3>
       <button class="close-x" onclick="closeHistoryModal()">×</button>
     </div>
+    <div class="history-filters">
+      <input id="histSearch" placeholder="Search ref no, name, or item…" oninput="renderHistory()">
+      <select id="histCompany" onchange="renderHistory()">
+        <option value="">All companies</option>
+        <option value="PSMS">PSMS</option>
+        <option value="PPM">PPM</option>
+      </select>
+      <select id="histReason" onchange="renderHistory()">
+        <option value="">Any reason</option>
+        <option value="damaged">Damaged</option>
+        <option value="obsolete">Obsolete</option>
+        <option value="expired">Expired</option>
+        <option value="surplus">Surplus</option>
+        <option value="recalled">Recalled</option>
+        <option value="contaminated">Contaminated</option>
+        <option value="lost">Lost</option>
+        <option value="other">Other</option>
+      </select>
+      <input type="date" id="histFrom" onchange="renderHistory()" title="From date">
+      <input type="date" id="histTo" onchange="renderHistory()" title="To date">
+      <button class="link" onclick="clearHistoryFilters()">Clear</button>
+    </div>
     <div id="historyContainer" class="history-list"></div>
     <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="bulkExportHistory('pdf')">📄 Export all (PDFs)</button>
+      <button class="btn btn-secondary" onclick="bulkExportHistory('docx')">📝 Export all (Word)</button>
       <button class="btn btn-secondary" onclick="closeHistoryModal()">Close</button>
     </div>
   </div>
@@ -23941,6 +24519,10 @@ let history = []; // [{ ref_no, company, form_data, created_at }]
 let currentForm = makeEmptyForm();
 let searchTargetIdx = null;
 let sparePartTargetIdx = null;
+let bulkAddSelection = new Set();  // selected codes during bulk-add
+let bulkAddMode = 'items';          // 'items' | 'spare_parts'
+const MAX_ITEMS = 30;               // hard cap on items rows
+const MAX_SPARE_PARTS = 30;         // hard cap on spare-parts rows
 
 function makeEmptyForm() {
   return {
@@ -24040,13 +24622,33 @@ function generateRefNo() {
   const ref = `${COMPANY_INFO[currentForm.company].refPrefix}/${year}/${padded}`;
   currentForm.ref_no = ref;
   document.getElementById('refNo').value = ref;
+  updateRefQrPreview();
   toast(`Reserved ${ref}`);
+}
+
+function updateRefQrPreview() {
+  const wrap = document.getElementById('refQrPreview');
+  if (!wrap) return;
+  const ref = (currentForm.ref_no || '').trim();
+  if (!ref) {
+    wrap.innerHTML = '<div class="ref-qr-empty">QR appears once ref number is set</div>';
+    return;
+  }
+  try {
+    const qr = qrcode(0, 'M');
+    qr.addData(ref);
+    qr.make();
+    wrap.innerHTML = qr.createSvgTag({ scalable: true, margin: 1 });
+  } catch (e) {
+    wrap.innerHTML = '<div class="ref-qr-empty">QR error</div>';
+  }
 }
 
 function onRefNoEdit() {
   // User typed a ref number manually
   const v = document.getElementById('refNo').value.trim();
   currentForm.ref_no = v;
+  updateRefQrPreview();
   if (!v) return;
   // Try to extract year and seq from a well-formed ref like PSMS/ID/2026/001
   // and bump the counter so future auto-generated numbers don't collide
@@ -24091,19 +24693,25 @@ function renderItems() {
     row.innerHTML = `
       <div class="row-idx">${idx + 1}</div>
       <div class="row-desc">
+        <span class="field-label">Item description</span>
         <input value="${escapeHtml(it.description)}" placeholder="Item description" data-field="description" data-idx="${idx}">
         <button class="link" onclick="openSearchModal(${idx})">Search catalog…</button>
       </div>
-      <input value="${escapeHtml(it.asset_tag)}" data-field="asset_tag" data-idx="${idx}">
-      <input value="${escapeHtml(it.sku)}" data-field="sku" data-idx="${idx}">
-      <input value="${escapeHtml(it.qty)}" data-field="qty" data-idx="${idx}">
-      <input value="${escapeHtml(it.condition)}" data-field="condition" data-idx="${idx}">
-      <select data-field="method_code" data-idx="${idx}">
-        <option value="">—</option>
-        ${DISPOSAL_METHODS.map(m => `
-          <option value="${m.code}" ${m.code === it.method_code ? 'selected' : ''}>${m.code} — ${m.label}</option>
-        `).join('')}
-      </select>
+      <div><span class="field-label">Asset / Serial</span>
+        <input value="${escapeHtml(it.asset_tag)}" placeholder="Asset / Serial" data-field="asset_tag" data-idx="${idx}"></div>
+      <div><span class="field-label">SKU / Code</span>
+        <input value="${escapeHtml(it.sku)}" placeholder="SKU / Code" data-field="sku" data-idx="${idx}"></div>
+      <div><span class="field-label">Qty</span>
+        <input value="${escapeHtml(it.qty)}" placeholder="Qty" data-field="qty" data-idx="${idx}"></div>
+      <div><span class="field-label">Condition</span>
+        <input value="${escapeHtml(it.condition)}" placeholder="Condition" data-field="condition" data-idx="${idx}"></div>
+      <div><span class="field-label">Disposal method</span>
+        <select data-field="method_code" data-idx="${idx}">
+          <option value="">— method —</option>
+          ${DISPOSAL_METHODS.map(m => `
+            <option value="${m.code}" ${m.code === it.method_code ? 'selected' : ''}>${m.code} — ${m.label}</option>
+          `).join('')}
+        </select></div>
       <button class="row-remove" onclick="removeItemRow(${idx})" title="Remove">×</button>
     `;
     c.appendChild(row);
@@ -24117,11 +24725,11 @@ function renderItems() {
     });
   });
   document.getElementById('rowCount').textContent = currentForm.items.length;
-  document.getElementById('addRowBtn').disabled = currentForm.items.length >= 8;
+  document.getElementById('addRowBtn').disabled = currentForm.items.length >= MAX_ITEMS;
 }
 
 function addItemRow() {
-  if (currentForm.items.length >= 8) return;
+  if (currentForm.items.length >= MAX_ITEMS) { toast(`Maximum ${MAX_ITEMS} items per form`, true); return; }
   currentForm.items.push(makeEmptyRow());
   renderItems();
 }
@@ -24232,13 +24840,18 @@ function renderSpareParts() {
     row.innerHTML = `
       <div class="row-idx">${idx + 1}</div>
       <div class="row-desc">
+        <span class="field-label">Spare part description</span>
         <input value="${escapeHtml(sp.description)}" placeholder="Spare part description" data-spf="description" data-idx="${idx}">
         <button class="link" onclick="openSparePartSearch(${idx})">Search spare parts…</button>
       </div>
-      <input value="${escapeHtml(sp.part_code)}" placeholder="Part code" data-spf="part_code" data-idx="${idx}">
-      <input value="${escapeHtml(sp.qty)}" placeholder="0" data-spf="qty" data-idx="${idx}">
-      <input value="${escapeHtml(sp.condition)}" placeholder="e.g. reusable" data-spf="condition" data-idx="${idx}">
-      <input value="${escapeHtml(sp.notes)}" placeholder="Notes (optional)" data-spf="notes" data-idx="${idx}">
+      <div><span class="field-label">Part code</span>
+        <input value="${escapeHtml(sp.part_code)}" placeholder="Part code" data-spf="part_code" data-idx="${idx}"></div>
+      <div><span class="field-label">Qty</span>
+        <input value="${escapeHtml(sp.qty)}" placeholder="0" data-spf="qty" data-idx="${idx}"></div>
+      <div><span class="field-label">Condition</span>
+        <input value="${escapeHtml(sp.condition)}" placeholder="e.g. reusable" data-spf="condition" data-idx="${idx}"></div>
+      <div><span class="field-label">Notes</span>
+        <input value="${escapeHtml(sp.notes)}" placeholder="Notes (optional)" data-spf="notes" data-idx="${idx}"></div>
       <button class="row-remove" onclick="removeSparePartRow(${idx})" title="Remove">×</button>
     `;
     c.appendChild(row);
@@ -24253,6 +24866,7 @@ function renderSpareParts() {
 }
 
 function addSparePartRow() {
+  if (currentForm.spare_parts.length >= MAX_SPARE_PARTS) { toast(`Maximum ${MAX_SPARE_PARTS} spare parts per form`, true); return; }
   currentForm.spare_parts.push(makeEmptySparePartRow());
   renderSpareParts();
 }
@@ -24347,6 +24961,222 @@ function saveNewSparePart() {
   toast(`Registered "${name}"`);
 }
 
+/* ============== CATALOG MANAGER ============== */
+let catalogMode = 'items'; // 'items' | 'spare_parts'
+let catalogEditingCode = null;
+
+function openCatalogManager(mode) {
+  closeSettingsMenu();
+  catalogMode = mode || 'items';
+  catalogEditingCode = null;
+  document.getElementById('catSearchInput').value = '';
+  switchCatalogMode(catalogMode);
+  document.getElementById('catalogModal').classList.add('active');
+}
+function closeCatalogManager() {
+  document.getElementById('catalogModal').classList.remove('active');
+  catalogEditingCode = null;
+}
+function switchCatalogMode(mode) {
+  catalogMode = mode;
+  catalogEditingCode = null;
+  document.getElementById('catalogTitle').textContent =
+    mode === 'spare_parts' ? 'Manage Spare Parts Catalog' : 'Manage Custom Items';
+  document.querySelectorAll('.cat-tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('data-cat-mode') === mode);
+  });
+  renderCatalogList();
+}
+function _catalogArray() {
+  return catalogMode === 'spare_parts' ? customSpareParts : customItems;
+}
+function renderCatalogList() {
+  document.getElementById('catItemCount').textContent  = `(${customItems.length})`;
+  document.getElementById('catSpareCount').textContent = `(${customSpareParts.length})`;
+
+  const arr = _catalogArray();
+  const q = (document.getElementById('catSearchInput')?.value || '').trim().toLowerCase();
+  const filtered = q
+    ? arr.filter(i => (i.c || '').toLowerCase().includes(q) || (i.n || '').toLowerCase().includes(q) || (i.b || '').toLowerCase().includes(q))
+    : arr;
+
+  const c = document.getElementById('catalogResults');
+  if (filtered.length === 0) {
+    c.innerHTML = `<div class="cat-empty">${arr.length === 0 ? (catalogMode === 'spare_parts' ? 'No spare parts registered yet.' : 'No custom items yet.') : 'No matches.'}</div>`;
+    return;
+  }
+  c.innerHTML = filtered.map(i => {
+    if (catalogEditingCode === i.c) {
+      return `
+        <div class="cat-row cat-edit">
+          <input value="${escapeHtml(i.c)}" data-ce-field="c" disabled title="Code is not editable">
+          <input value="${escapeHtml(i.n)}" data-ce-field="n" placeholder="Name">
+          <input value="${escapeHtml(i.b || '')}" data-ce-field="b" placeholder="Brand">
+          <div class="c-actions">
+            <button class="btn" onclick="saveCatalogEdit('${escapeAttr(i.c)}')">Save</button>
+            <button class="btn btn-secondary" onclick="renderCatalogList()">Cancel</button>
+          </div>
+        </div>`;
+    }
+    return `
+      <div class="cat-row">
+        <div class="c-code">${escapeHtml(i.c)}</div>
+        <div class="c-name">${escapeHtml(i.n)}</div>
+        <div class="c-brand">${escapeHtml(i.b || '')}</div>
+        <div class="c-actions">
+          <button class="btn btn-secondary" onclick="startCatalogEdit('${escapeAttr(i.c)}')">Edit</button>
+          <button class="btn btn-danger" onclick="deleteCatalogEntry('${escapeAttr(i.c)}')">Delete</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+function startCatalogEdit(code) {
+  catalogEditingCode = code;
+  renderCatalogList();
+}
+function saveCatalogEdit(code) {
+  const arr = _catalogArray();
+  const idx = arr.findIndex(i => i.c === code);
+  if (idx === -1) return;
+  const row = document.querySelector(`.cat-edit`);
+  if (!row) return;
+  const n = row.querySelector('[data-ce-field="n"]').value.trim();
+  const b = row.querySelector('[data-ce-field="b"]').value.trim();
+  if (!n) { toast('Name required', true); return; }
+  arr[idx] = { ...arr[idx], n, b };
+  saveState();
+  catalogEditingCode = null;
+  renderCatalogList();
+  toast('Updated');
+}
+function deleteCatalogEntry(code) {
+  const arr = _catalogArray();
+  const idx = arr.findIndex(i => i.c === code);
+  if (idx === -1) return;
+  if (!confirm(`Delete "${arr[idx].n}" from the catalog? This won't affect any saved forms.`)) return;
+  arr.splice(idx, 1);
+  saveState();
+  renderCatalogList();
+  toast('Deleted from catalog');
+}
+
+/* ============== BULK ADD MODAL ============== */
+function openBulkAddModal(mode) {
+  bulkAddMode = mode || 'items';
+  bulkAddSelection = new Set();
+  document.getElementById('bulkAddTitle').textContent =
+    mode === 'spare_parts' ? 'Bulk Add Spare Parts' : 'Bulk Add Items from Catalog';
+  document.getElementById('bulkSearchInput').value = '';
+  document.getElementById('bulkSelectAll').checked = false;
+  renderBulkResults('');
+  updateBulkSelectedCount();
+  document.getElementById('bulkAddModal').classList.add('active');
+  setTimeout(() => document.getElementById('bulkSearchInput').focus(), 50);
+}
+function closeBulkAddModal() {
+  document.getElementById('bulkAddModal').classList.remove('active');
+  bulkAddSelection.clear();
+}
+function clearBulkSelection() {
+  bulkAddSelection.clear();
+  document.getElementById('bulkSelectAll').checked = false;
+  renderBulkResults(document.getElementById('bulkSearchInput').value);
+  updateBulkSelectedCount();
+}
+function _bulkCatalog() {
+  if (bulkAddMode === 'spare_parts') {
+    return customSpareParts.map(i => ({ ...i, _empty: false }));
+  }
+  return allInventory();
+}
+function _bulkFiltered(query) {
+  const q = (query || '').trim().toLowerCase();
+  let items = _bulkCatalog();
+  if (q) {
+    items = items.filter(i =>
+      (i.c || '').toLowerCase().includes(q) ||
+      (i.n || '').toLowerCase().includes(q) ||
+      (i.b || '').toLowerCase().includes(q)
+    );
+  }
+  return items;
+}
+function renderBulkResults(query) {
+  const items = _bulkFiltered(query);
+  const c = document.getElementById('bulkResults');
+  if (items.length === 0) {
+    c.innerHTML = `<div class="modal-empty">${bulkAddMode === 'spare_parts' && customSpareParts.length === 0 ? 'No spare parts registered yet. Register some first.' : 'No matches.'}</div>`;
+    return;
+  }
+  // Render up to 200 for perf
+  const slice = items.slice(0, 200);
+  c.innerHTML = slice.map(i => `
+    <label class="bulk-row ${bulkAddSelection.has(i.c) ? 'selected' : ''}" data-code="${escapeAttr(i.c)}">
+      <input type="checkbox" ${bulkAddSelection.has(i.c) ? 'checked' : ''} data-code="${escapeAttr(i.c)}">
+      <span class="b-code">${escapeHtml(i.c)}${i.custom ? '<span class="badge">NEW</span>' : ''}</span>
+      <span class="b-name">${escapeHtml(i.n)}</span>
+      <span class="b-brand">${escapeHtml(i.b || '')}</span>
+    </label>
+  `).join('') + (items.length > 200 ? `<div class="modal-empty">Showing first 200 of ${items.length}. Refine search to see more.</div>` : '');
+  // Wire checkboxes
+  c.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', e => {
+      const code = e.target.getAttribute('data-code');
+      if (e.target.checked) bulkAddSelection.add(code);
+      else bulkAddSelection.delete(code);
+      e.target.closest('.bulk-row').classList.toggle('selected', e.target.checked);
+      updateBulkSelectedCount();
+    });
+  });
+}
+function toggleBulkSelectAll(on) {
+  const items = _bulkFiltered(document.getElementById('bulkSearchInput').value);
+  if (on) items.forEach(i => bulkAddSelection.add(i.c));
+  else items.forEach(i => bulkAddSelection.delete(i.c));
+  renderBulkResults(document.getElementById('bulkSearchInput').value);
+  updateBulkSelectedCount();
+}
+function updateBulkSelectedCount() {
+  const n = bulkAddSelection.size;
+  document.getElementById('bulkSelectedCount').textContent = n;
+  document.getElementById('bulkAddBtnCount').textContent = n;
+  document.getElementById('bulkAddBtn').disabled = n === 0;
+}
+function addSelectedBulkItems() {
+  if (bulkAddSelection.size === 0) return;
+  const catalog = _bulkCatalog();
+  const picked = [...bulkAddSelection]
+    .map(code => catalog.find(i => i.c === code))
+    .filter(Boolean);
+  if (bulkAddMode === 'spare_parts') {
+    // Fill empty rows first, then append. Cap at MAX_SPARE_PARTS.
+    const existing = currentForm.spare_parts;
+    let cursor = 0;
+    for (const sp of picked) {
+      while (cursor < existing.length && (existing[cursor].description || existing[cursor].part_code)) cursor++;
+      const row = { description: sp.n + (sp.b ? ` (${sp.b})` : ''), part_code: sp.c, qty: '1', condition: '', notes: '' };
+      if (cursor < existing.length) { existing[cursor] = row; cursor++; }
+      else if (existing.length < MAX_SPARE_PARTS) existing.push(row);
+      else { toast(`Reached the ${MAX_SPARE_PARTS}-row cap`, true); break; }
+    }
+    renderSpareParts();
+    toast(`Added ${picked.length} spare part${picked.length !== 1 ? 's' : ''}`);
+  } else {
+    const existing = currentForm.items;
+    let cursor = 0;
+    for (const it of picked) {
+      while (cursor < existing.length && (existing[cursor].description || existing[cursor].sku)) cursor++;
+      const row = { description: it.n + (it.b ? ` (${it.b})` : ''), asset_tag: '', sku: it.c, qty: '1', condition: '', method_code: '' };
+      if (cursor < existing.length) { existing[cursor] = row; cursor++; }
+      else if (existing.length < MAX_ITEMS) existing.push(row);
+      else { toast(`Reached the ${MAX_ITEMS}-row cap`, true); break; }
+    }
+    renderItems();
+    toast(`Added ${picked.length} item${picked.length !== 1 ? 's' : ''}`);
+  }
+  closeBulkAddModal();
+}
+
 /* ============== REASONS ============== */
 function renderReasons() {
   const g = document.getElementById('reasonsGrid');
@@ -24389,6 +25219,7 @@ function fillFieldsFromForm() {
   document.getElementById('f_department').value  = currentForm.department;
   document.getElementById('f_notes').value       = currentForm.notes;
   document.getElementById('refNo').value         = currentForm.ref_no;
+  updateRefQrPreview();
   // Migrate legacy signature objects to arrays
   if (currentForm.signatures && !Array.isArray(currentForm.signatures)) {
     const old = currentForm.signatures;
@@ -24497,7 +25328,43 @@ function renderHistory() {
     c.innerHTML = '<div class="modal-empty">No saved forms yet.</div>';
     return;
   }
-  c.innerHTML = history.map((h, i) => `
+  // Read filter inputs
+  const fSearch  = (document.getElementById('histSearch')?.value || '').trim().toLowerCase();
+  const fCompany = document.getElementById('histCompany')?.value || '';
+  const fReason  = document.getElementById('histReason')?.value || '';
+  const fFrom    = document.getElementById('histFrom')?.value || '';
+  const fTo      = document.getElementById('histTo')?.value || '';
+
+  const filtered = history.filter(h => {
+    if (fCompany && h.company !== fCompany) return false;
+    const f = h.form_data || {};
+    const d = f.form_date || (h.created_at || '').slice(0, 10);
+    if (fFrom && d < fFrom) return false;
+    if (fTo   && d > fTo)   return false;
+    if (fReason) {
+      const r = f.reasons || {};
+      if (!r[fReason]) return false;
+    }
+    if (fSearch) {
+      const blob = [
+        h.ref_no, h.summary,
+        f.requested_by, f.department, f.warehouse, f.location,
+        ...(f.items || []).map(it => (it.description || '') + ' ' + (it.sku || '')),
+        ...(f.spare_parts || []).map(sp => (sp.description || '') + ' ' + (sp.part_code || '')),
+      ].join(' ').toLowerCase();
+      if (!blob.includes(fSearch)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    c.innerHTML = '<div class="modal-empty">No forms match these filters.</div>';
+    return;
+  }
+
+  c.innerHTML = filtered.map((h) => {
+    const i = history.indexOf(h);
+    return `
     <div class="history-row">
       <div class="h-ref">${escapeHtml(h.ref_no)}</div>
       <div class="h-company">${escapeHtml(h.company)}</div>
@@ -24510,7 +25377,76 @@ function renderHistory() {
         <button class="btn btn-danger" onclick="deleteHistory(${i})">×</button>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
+}
+
+function clearHistoryFilters() {
+  ['histSearch','histCompany','histReason','histFrom','histTo'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  renderHistory();
+}
+
+async function bulkExportHistory(kind) {
+  // Get the currently-visible (filtered) records
+  const fSearch  = (document.getElementById('histSearch')?.value || '').trim().toLowerCase();
+  const fCompany = document.getElementById('histCompany')?.value || '';
+  const fReason  = document.getElementById('histReason')?.value || '';
+  const fFrom    = document.getElementById('histFrom')?.value || '';
+  const fTo      = document.getElementById('histTo')?.value || '';
+  const records = history.filter(h => {
+    if (fCompany && h.company !== fCompany) return false;
+    const f = h.form_data || {};
+    const d = f.form_date || (h.created_at || '').slice(0, 10);
+    if (fFrom && d < fFrom) return false;
+    if (fTo   && d > fTo)   return false;
+    if (fReason) { const r = f.reasons || {}; if (!r[fReason]) return false; }
+    if (fSearch) {
+      const blob = [h.ref_no, h.summary, f.requested_by, f.department].join(' ').toLowerCase();
+      if (!blob.includes(fSearch)) return false;
+    }
+    return true;
+  });
+  if (records.length === 0) { toast('Nothing to export with current filters', true); return; }
+  if (!confirm(`Download ${records.length} ${kind.toUpperCase()} file${records.length !== 1 ? 's' : ''}? Your browser may prompt you to allow multiple downloads.`)) return;
+
+  const saved = currentForm;
+  toast(`Generating ${records.length} ${kind.toUpperCase()} file${records.length !== 1 ? 's' : ''}…`);
+  let done = 0;
+  try {
+    for (const h of records) {
+      currentForm = JSON.parse(JSON.stringify(h.form_data));
+      const fname = (h.ref_no || 'form').replace(/\//g, '_');
+      let blob, ext;
+      if (kind === 'pdf') {
+        const bytes = await generatePdfBytes();
+        blob = new Blob([bytes], { type: 'application/pdf' });
+        ext = '.pdf';
+      } else {
+        blob = await generateDocxBlob();
+        ext = '.docx';
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fname + ext;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      // small delay between downloads so browser doesn't drop them
+      await new Promise(r => setTimeout(r, 350));
+      URL.revokeObjectURL(url);
+      done++;
+    }
+    toast(`Exported ${done} file${done !== 1 ? 's' : ''}`);
+  } catch (e) {
+    console.error(e);
+    toast(`Export failed after ${done}: ` + e.message, true);
+  } finally {
+    currentForm = saved;
+  }
 }
 function loadHistory(idx) {
   currentForm = JSON.parse(JSON.stringify(history[idx].form_data));
@@ -24679,6 +25615,41 @@ async function generatePdfBytes() {
   drawText(compName, A4_W - MR - w, y, 9, font, rgb(0.3, 0.3, 0.3));
   y -= 24;
 
+  // QR code (top-right, encodes ref no for traceability)
+  function drawQrInPdf(p, qx, qy, qsize, data) {
+    try {
+      const qr = qrcode(0, 'M');
+      qr.addData(data);
+      qr.make();
+      const n = qr.getModuleCount();
+      const cell = qsize / n;
+      // White background
+      p.drawRectangle({ x: qx, y: qy, width: qsize, height: qsize, color: rgb(1, 1, 1) });
+      for (let r = 0; r < n; r++) {
+        for (let cl = 0; cl < n; cl++) {
+          if (qr.isDark(r, cl)) {
+            p.drawRectangle({
+              x: qx + cl * cell,
+              y: qy + qsize - (r + 1) * cell,
+              width: cell + 0.2,
+              height: cell + 0.2,
+              color: rgb(0, 0, 0),
+            });
+          }
+        }
+      }
+    } catch (e) { console.error('PDF QR err:', e); }
+  }
+  if (form.ref_no) {
+    const qrSize = 50;
+    const qrX = A4_W - MR - qrSize;
+    const qrY = 615;
+    drawQrInPdf(page, qrX, qrY, qrSize, form.ref_no);
+    const qrLabel = 'Scan for ref';
+    const lblW = font.widthOfTextAtSize(qrLabel, 6.5);
+    drawText(qrLabel, qrX + (qrSize - lblW) / 2, qrY - 7, 6.5, font, rgb(0.45, 0.45, 0.45));
+  }
+
   // Section 1
   sectionTitle('1. Request Information');
   const col = CW / 2;
@@ -24706,7 +25677,25 @@ async function generatePdfBytes() {
   y -= 16;
   const tableTop = y + 16;
   const rowH = 22;
-  for (let i = 0; i < 8; i++) {
+  const itemRowCount = Math.max(form.items.length, 5);
+  for (let i = 0; i < itemRowCount; i++) {
+    // Page break if needed
+    if (y - rowH < 120) {
+      // close current table border
+      page.drawLine({ start: { x: ML, y }, end: { x: A4_W - MR, y }, thickness: 0.3, color: rgb(0.8, 0.8, 0.8) });
+      // verticals for current chunk
+      let vx = ML;
+      for (let j = 0; j <= widths.length; j++) {
+        page.drawLine({ start: { x: vx, y }, end: { x: vx, y: tableTop }, thickness: 0.3, color: rgb(0.8, 0.8, 0.8) });
+        vx += widths[j] || 0;
+      }
+      page = newPage(); y = 670;
+      sectionTitle('2. Items for Disposal (cont.)');
+      page.drawRectangle({ x: ML, y: y - 4, width: CW, height: 16, color: rgb(0.93, 0.95, 0.99) });
+      let hx = ML;
+      headers.forEach((h, j) => { drawText(h, hx + 3, y, 8, bold, rgb(0.1, 0.3, 0.6)); hx += widths[j]; });
+      y -= 16;
+    }
     const it = form.items[i] || { description: '', asset_tag: '', sku: '', qty: '', condition: '', method_code: '' };
     page.drawLine({ start: { x: ML, y }, end: { x: A4_W - MR, y }, thickness: 0.3, color: rgb(0.8, 0.8, 0.8) });
     cx = ML;
@@ -24936,7 +25925,7 @@ async function generateDocxBlob() {
     ),
   });
   const itemRows = [];
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < Math.max(form.items.length, 5); i++) {
     const it = form.items[i] || { description: '', asset_tag: '', sku: '', qty: '', condition: '', method_code: '' };
     const methodEntry = DISPOSAL_METHODS.find(m => m.code === it.method_code);
     const methodText = methodEntry ? methodEntry.label : (it.method_code || '');
@@ -25154,19 +26143,147 @@ async function downloadDocx(skipSave) {
   }
 }
 
+/* ============== REPORTS ============== */
+function renderReports() {
+  const records = history || [];
+  // Summary stats
+  let totalItems = 0, totalSpare = 0, thisMonth = 0;
+  const now = new Date();
+  const thisMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  records.forEach(h => {
+    const f = h.form_data || {};
+    totalItems += (f.items || []).filter(it => it.description || it.sku).length;
+    totalSpare += (f.spare_parts || []).filter(sp => sp.description || sp.part_code).length;
+    const d = f.form_date || (h.created_at || '').slice(0, 10);
+    if (d && d.startsWith(thisMonthKey)) thisMonth++;
+  });
+  document.getElementById('statTotalForms').textContent = records.length;
+  document.getElementById('statTotalItems').textContent = totalItems;
+  document.getElementById('statTotalSpare').textContent = totalSpare;
+  document.getElementById('statThisMonth').textContent = thisMonth;
+
+  // By month (last 12)
+  const months = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const label = d.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
+    months.push({ key, label, count: 0 });
+  }
+  records.forEach(h => {
+    const f = h.form_data || {};
+    const d = f.form_date || (h.created_at || '').slice(0, 10);
+    if (!d) return;
+    const key = d.slice(0, 7);
+    const m = months.find(mm => mm.key === key);
+    if (m) m.count++;
+  });
+  _drawBarChart('chartByMonth', months.map(m => ({ label: m.label, value: m.count })));
+
+  // By company
+  const compMap = {};
+  records.forEach(h => {
+    const code = h.company || 'Unknown';
+    compMap[code] = (compMap[code] || 0) + 1;
+  });
+  const compRows = Object.entries(compMap)
+    .map(([k, v]) => ({ label: k, value: v }))
+    .sort((a, b) => b.value - a.value);
+  _drawBarChart('chartByCompany', compRows);
+
+  // By reason
+  const reasonMap = {};
+  records.forEach(h => {
+    const f = h.form_data || {};
+    const reasons = f.reasons || {};
+    Object.keys(reasons).forEach(k => {
+      if (reasons[k]) reasonMap[k] = (reasonMap[k] || 0) + 1;
+    });
+  });
+  const reasonRows = REASONS
+    .map(([k, lbl]) => ({ label: lbl.length > 28 ? lbl.slice(0, 26) + '…' : lbl, value: reasonMap[k] || 0 }))
+    .filter(r => r.value > 0)
+    .sort((a, b) => b.value - a.value);
+  _drawBarChart('chartByReason', reasonRows);
+
+  // Top items
+  const itemMap = {};
+  records.forEach(h => {
+    const f = h.form_data || {};
+    (f.items || []).forEach(it => {
+      if (!it.description) return;
+      const key = (it.sku || it.description.slice(0, 40));
+      const label = it.description.split(' (')[0];
+      itemMap[key] = itemMap[key] || { label, count: 0 };
+      itemMap[key].count += parseFloat(it.qty) || 1;
+    });
+  });
+  const topItems = Object.values(itemMap).sort((a, b) => b.count - a.count).slice(0, 10);
+  _drawList('chartTopItems', topItems);
+
+  // Top spare parts
+  const spMap = {};
+  records.forEach(h => {
+    const f = h.form_data || {};
+    (f.spare_parts || []).forEach(sp => {
+      if (!sp.description && !sp.part_code) return;
+      const key = (sp.part_code || sp.description.slice(0, 40));
+      const label = (sp.description || sp.part_code).split(' (')[0];
+      spMap[key] = spMap[key] || { label, count: 0 };
+      spMap[key].count += parseFloat(sp.qty) || 1;
+    });
+  });
+  const topSpare = Object.values(spMap).sort((a, b) => b.count - a.count).slice(0, 10);
+  _drawList('chartTopSpare', topSpare);
+}
+
+function _drawBarChart(elemId, rows) {
+  const c = document.getElementById(elemId);
+  if (!rows.length || rows.every(r => !r.value)) {
+    c.innerHTML = '<div class="chart-empty">No data yet — save some forms first.</div>';
+    return;
+  }
+  const max = Math.max(1, ...rows.map(r => r.value));
+  c.innerHTML = rows.map(r => `
+    <div class="chart-bar-row">
+      <div class="cb-label">${escapeHtml(r.label)}</div>
+      <div class="cb-track"><div class="cb-fill" style="width: ${(r.value / max * 100).toFixed(1)}%"></div></div>
+      <div class="cb-val">${r.value}</div>
+    </div>
+  `).join('');
+}
+
+function _drawList(elemId, rows) {
+  const c = document.getElementById(elemId);
+  if (!rows.length) {
+    c.innerHTML = '<div class="chart-empty">No data yet — save some forms first.</div>';
+    return;
+  }
+  c.innerHTML = rows.map((r, i) => `
+    <div class="chart-list-row">
+      <div class="cl-rank">${String(i + 1).padStart(2, '0')}</div>
+      <div class="cl-name" title="${escapeAttr(r.label)}">${escapeHtml(r.label)}</div>
+      <div class="cl-count">${r.count}</div>
+    </div>
+  `).join('');
+}
+
 /* ============== TAB SWITCHING ============== */
 function switchTab(tab) {
   document.getElementById('disposalPage').classList.toggle('hidden', tab !== 'disposal');
   document.getElementById('labelsPage').classList.toggle('hidden', tab !== 'labels');
+  document.getElementById('reportsPage').classList.toggle('hidden', tab !== 'reports');
   document.querySelectorAll('.tab-btn').forEach(b => {
     b.classList.toggle('active', b.getAttribute('data-tab') === tab);
   });
   document.body.classList.toggle('tab-labels', tab === 'labels');
+  document.body.classList.toggle('tab-reports', tab === 'reports');
   // Lazy-init the labels tool the first time it's shown
   if (tab === 'labels' && typeof window.__labelsInit === 'function' && !window.__labelsReady) {
     window.__labelsInit();
     window.__labelsReady = true;
   }
+  if (tab === 'reports') renderReports();
   // Remember the active tab
   localStorage.setItem('activeTab', tab);
 }
@@ -25191,10 +26308,16 @@ window.addEventListener('DOMContentLoaded', () => {
   // Restore active tab
   const savedTab = localStorage.getItem('activeTab');
   if (savedTab === 'labels') switchTab('labels');
+  else if (savedTab === 'reports') switchTab('reports');
 
   // Wire up search inputs
   document.getElementById('searchInput').addEventListener('input', e => renderSearchResults(e.target.value));
   document.getElementById('sparePartSearchInput').addEventListener('input', e => renderSparePartSearchResults(e.target.value));
+  document.getElementById('bulkSearchInput').addEventListener('input', e => {
+    renderBulkResults(e.target.value);
+    document.getElementById('bulkSelectAll').checked = false;
+  });
+  document.getElementById('catSearchInput').addEventListener('input', () => renderCatalogList());
 
   // Close modals on overlay click and Escape
   document.querySelectorAll('.modal-overlay').forEach(o => {
