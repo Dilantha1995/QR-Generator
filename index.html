@@ -822,6 +822,35 @@
     width: 100%;
   }
   .items-row input:focus, .items-row select:focus { border-color: var(--accent); }
+
+  /* Spare parts overrides — 6-col layout (no method/select column) */
+  .spare-head, .spare-row {
+    grid-template-columns: 28px 2.2fr 1.2fr 60px 1fr 1.6fr 28px;
+  }
+  .sp-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+  }
+  .sp-toggle input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .sp-actions {
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .sp-actions-btns { display: flex; gap: 8px; flex-wrap: wrap; }
   .link {
     background: none;
     border: none;
@@ -1159,6 +1188,38 @@
     </div>
   </div>
 
+  <!-- Section 3: Spare Parts Removed -->
+  <div class="panel">
+    <div class="section-head">
+      <h2>3. Spare Parts Removed <span style="font-weight:400;font-size:13px;color:var(--muted);margin-left:6px;">(from disposed machines)</span></h2>
+      <label class="sp-toggle">
+        <input type="checkbox" id="includeSpareParts" onchange="toggleSpareParts(this.checked)">
+        <span>Include this section</span>
+      </label>
+    </div>
+    <div id="sparePartsBlock" style="display:none;">
+      <div class="items-table">
+        <div class="items-head spare-head">
+          <div>#</div>
+          <div>Spare Part Description</div>
+          <div>Part Code</div>
+          <div>Qty</div>
+          <div>Condition</div>
+          <div>Notes</div>
+          <div></div>
+        </div>
+        <div id="sparePartsContainer"></div>
+      </div>
+      <div class="sp-actions">
+        <span class="small">Pick from your spare-parts catalog, or register a new one.</span>
+        <div class="sp-actions-btns">
+          <button class="btn btn-secondary" onclick="addSparePartRow()">+ Add Row</button>
+          <button class="btn btn-secondary" onclick="openNewSparePartModal()">+ Register New Spare Part</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Section 4: Reasons -->
   <div class="panel">
     <h2>4. Reason for Disposal</h2>
@@ -1324,6 +1385,41 @@
     <div class="modal-foot">
       <button class="btn btn-secondary" onclick="closeNewItemModal()">Cancel</button>
       <button class="btn" onclick="saveNewItem()">Add &amp; Use</button>
+    </div>
+  </div>
+</div>
+
+<!-- Spare Part search modal -->
+<div class="modal-overlay" id="sparePartSearchModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Search Spare Parts Catalog</h3>
+      <button class="close-x" onclick="closeSparePartSearch()">×</button>
+    </div>
+    <input class="modal-search" id="sparePartSearchInput" placeholder="Search by part code, name, or machine…" autocomplete="off">
+    <div class="modal-results" id="sparePartSearchResults"></div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="openNewSparePartModal()">+ Register New Spare Part</button>
+      <button class="btn btn-secondary" onclick="closeSparePartSearch()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- New spare part modal -->
+<div class="modal-overlay" id="newSparePartModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Register New Spare Part</h3>
+      <button class="close-x" onclick="closeNewSparePartModal()">×</button>
+    </div>
+    <div class="new-form">
+      <div class="field"><label>Part Code *</label><input id="nsp_code" placeholder="e.g. SP-VTR-3025"></div>
+      <div class="field"><label>Name / Description *</label><input id="nsp_name" placeholder="e.g. Reagent pump head"></div>
+      <div class="field"><label>From machine / Brand</label><input id="nsp_brand" placeholder="e.g. Vitros 350"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeNewSparePartModal()">Cancel</button>
+      <button class="btn" onclick="saveNewSparePart()">Register &amp; Use</button>
     </div>
   </div>
 </div>
@@ -23839,10 +23935,12 @@ const PPM_LETTERHEAD_B64  = document.getElementById('ppmLetterhead').textContent
 
 // Load persisted state
 let customItems = [];
+let customSpareParts = []; // [{ c, n, b }] — separate spare-parts catalog
 let counters = {}; // { 'PSMS-2026': 5, 'PPM-2026': 12 }
 let history = []; // [{ ref_no, company, form_data, created_at }]
 let currentForm = makeEmptyForm();
 let searchTargetIdx = null;
+let sparePartTargetIdx = null;
 
 function makeEmptyForm() {
   return {
@@ -23854,6 +23952,8 @@ function makeEmptyForm() {
     requested_by: '',
     department: '',
     items: [makeEmptyRow()],
+    include_spare_parts: false,
+    spare_parts: [makeEmptySparePartRow()],
     reasons: Object.fromEntries(REASONS.map(([k]) => [k, false])),
     other_text: '',
     notes: '',
@@ -23862,25 +23962,33 @@ function makeEmptyForm() {
 }
 function defaultSignatures() {
   return [
-    { title: 'Requested By', name: '' },
-    { title: 'Witness', name: '' },
-    { title: 'Warehouse Manager (Approval)', name: '' },
-    { title: 'Finance / Authorising Officer', name: '' },
+    { title: 'Requested By',                    name: 'Ummar Muktar' },
+    { title: 'Approved by (Bio Medical)',       name: 'Manoj Vasudev Kotian' },
+    { title: 'Approved by (Stores)',            name: 'Aman Attar' },
+    { title: 'Approved by (Head of Department)', name: 'Irshad Momin' },
+    { title: 'Witness -1 (Stores)',             name: 'Sayyam Sayyad' },
+    { title: 'Witness - 2 (Finance)',           name: 'Dilantha Chinthana' },
+    { title: 'Prepared by',                     name: 'Alfiya Patwegar' },
   ];
 }
 function makeEmptyRow() {
   return { description: '', asset_tag: '', sku: '', qty: '', condition: '', method_code: '' };
 }
+function makeEmptySparePartRow() {
+  return { description: '', part_code: '', qty: '', condition: '', notes: '' };
+}
 
 function loadState() {
-  try { customItems = JSON.parse(localStorage.getItem('disposal_customItems') || '[]'); } catch {}
-  try { counters    = JSON.parse(localStorage.getItem('disposal_counters')    || '{}'); } catch {}
-  try { history     = JSON.parse(localStorage.getItem('disposal_history')     || '[]'); } catch {}
+  try { customItems       = JSON.parse(localStorage.getItem('disposal_customItems')       || '[]'); } catch {}
+  try { customSpareParts  = JSON.parse(localStorage.getItem('disposal_customSpareParts')  || '[]'); } catch {}
+  try { counters          = JSON.parse(localStorage.getItem('disposal_counters')          || '{}'); } catch {}
+  try { history           = JSON.parse(localStorage.getItem('disposal_history')           || '[]'); } catch {}
 }
 function saveState() {
-  localStorage.setItem('disposal_customItems', JSON.stringify(customItems));
-  localStorage.setItem('disposal_counters', JSON.stringify(counters));
-  localStorage.setItem('disposal_history', JSON.stringify(history));
+  localStorage.setItem('disposal_customItems',      JSON.stringify(customItems));
+  localStorage.setItem('disposal_customSpareParts', JSON.stringify(customSpareParts));
+  localStorage.setItem('disposal_counters',         JSON.stringify(counters));
+  localStorage.setItem('disposal_history',          JSON.stringify(history));
 }
 
 function allInventory() {
@@ -24109,6 +24217,136 @@ function saveNewItem() {
   toast(`Added "${name}"`);
 }
 
+/* ============== SPARE PARTS ============== */
+function toggleSpareParts(on) {
+  currentForm.include_spare_parts = !!on;
+  document.getElementById('sparePartsBlock').style.display = on ? 'block' : 'none';
+}
+
+function renderSpareParts() {
+  const c = document.getElementById('sparePartsContainer');
+  c.innerHTML = '';
+  currentForm.spare_parts.forEach((sp, idx) => {
+    const row = document.createElement('div');
+    row.className = 'items-row spare-row';
+    row.innerHTML = `
+      <div class="row-idx">${idx + 1}</div>
+      <div class="row-desc">
+        <input value="${escapeHtml(sp.description)}" placeholder="Spare part description" data-spf="description" data-idx="${idx}">
+        <button class="link" onclick="openSparePartSearch(${idx})">Search spare parts…</button>
+      </div>
+      <input value="${escapeHtml(sp.part_code)}" placeholder="Part code" data-spf="part_code" data-idx="${idx}">
+      <input value="${escapeHtml(sp.qty)}" placeholder="0" data-spf="qty" data-idx="${idx}">
+      <input value="${escapeHtml(sp.condition)}" placeholder="e.g. reusable" data-spf="condition" data-idx="${idx}">
+      <input value="${escapeHtml(sp.notes)}" placeholder="Notes (optional)" data-spf="notes" data-idx="${idx}">
+      <button class="row-remove" onclick="removeSparePartRow(${idx})" title="Remove">×</button>
+    `;
+    c.appendChild(row);
+  });
+  c.querySelectorAll('input[data-spf]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const f   = e.target.getAttribute('data-spf');
+      const idx = parseInt(e.target.getAttribute('data-idx'), 10);
+      currentForm.spare_parts[idx][f] = e.target.value;
+    });
+  });
+}
+
+function addSparePartRow() {
+  currentForm.spare_parts.push(makeEmptySparePartRow());
+  renderSpareParts();
+}
+
+function removeSparePartRow(idx) {
+  if (currentForm.spare_parts.length <= 1) {
+    currentForm.spare_parts[0] = makeEmptySparePartRow();
+  } else {
+    currentForm.spare_parts.splice(idx, 1);
+  }
+  renderSpareParts();
+}
+
+/* ----- Spare-part search modal ----- */
+function openSparePartSearch(idx) {
+  sparePartTargetIdx = idx;
+  document.getElementById('sparePartSearchInput').value = '';
+  renderSparePartSearchResults('');
+  document.getElementById('sparePartSearchModal').classList.add('active');
+  setTimeout(() => document.getElementById('sparePartSearchInput').focus(), 50);
+}
+function closeSparePartSearch() {
+  document.getElementById('sparePartSearchModal').classList.remove('active');
+  sparePartTargetIdx = null;
+}
+function renderSparePartSearchResults(query) {
+  const q = (query || '').trim().toLowerCase();
+  let items = customSpareParts.slice();
+  if (q) {
+    items = items.filter(i =>
+      (i.c || '').toLowerCase().includes(q) ||
+      (i.n || '').toLowerCase().includes(q) ||
+      (i.b || '').toLowerCase().includes(q)
+    );
+  }
+  const c = document.getElementById('sparePartSearchResults');
+  if (items.length === 0) {
+    c.innerHTML = `<div class="modal-empty">
+      ${customSpareParts.length === 0 ? 'No spare parts registered yet. ' : 'No matches. '}
+      <button class="link" onclick="openNewSparePartModal('${escapeAttr(query)}')">+ Register new spare part</button>
+    </div>`;
+    return;
+  }
+  c.innerHTML = items.slice(0, 100).map(i => `
+    <div class="result-row" onclick="pickSparePart('${escapeAttr(i.c)}')">
+      <div class="r-code">${escapeHtml(i.c)}<span class="badge">SP</span></div>
+      <div>${escapeHtml(i.n)}</div>
+      <div class="r-brand">${escapeHtml(i.b || '')}</div>
+    </div>
+  `).join('') + (items.length > 100 ? `<div class="modal-empty">Showing first 100 of ${items.length}. Refine search.</div>` : '');
+}
+function pickSparePart(code) {
+  const sp = customSpareParts.find(i => i.c === code);
+  if (!sp || sparePartTargetIdx == null) return;
+  currentForm.spare_parts[sparePartTargetIdx].description = sp.n + (sp.b ? ` (${sp.b})` : '');
+  currentForm.spare_parts[sparePartTargetIdx].part_code = sp.c;
+  renderSpareParts();
+  closeSparePartSearch();
+}
+
+/* ----- New spare-part modal ----- */
+function openNewSparePartModal(prefill) {
+  ['nsp_code','nsp_name','nsp_brand'].forEach(id => document.getElementById(id).value = '');
+  if (prefill) {
+    if (/^[\d\-A-Z_/]+$/i.test(prefill) && prefill.length < 24) {
+      document.getElementById('nsp_code').value = prefill;
+    } else {
+      document.getElementById('nsp_name').value = prefill;
+    }
+  }
+  document.getElementById('newSparePartModal').classList.add('active');
+  setTimeout(() => document.getElementById('nsp_code').focus(), 50);
+}
+function closeNewSparePartModal() {
+  document.getElementById('newSparePartModal').classList.remove('active');
+}
+function saveNewSparePart() {
+  const code  = document.getElementById('nsp_code').value.trim();
+  const name  = document.getElementById('nsp_name').value.trim();
+  const brand = document.getElementById('nsp_brand').value.trim();
+  if (!code || !name) { toast('Part code and name required', true); return; }
+  if (customSpareParts.find(i => i.c === code)) { toast('Part code already exists', true); return; }
+  customSpareParts.push({ c: code, n: name, b: brand });
+  saveState();
+  if (sparePartTargetIdx != null) {
+    currentForm.spare_parts[sparePartTargetIdx].description = name + (brand ? ` (${brand})` : '');
+    currentForm.spare_parts[sparePartTargetIdx].part_code = code;
+    renderSpareParts();
+  }
+  closeNewSparePartModal();
+  closeSparePartSearch();
+  toast(`Registered "${name}"`);
+}
+
 /* ============== REASONS ============== */
 function renderReasons() {
   const g = document.getElementById('reasonsGrid');
@@ -24161,8 +24399,21 @@ function fillFieldsFromForm() {
       { title: 'Finance / Authorising Officer', name: old.finance || '' },
     ];
   }
+  if (!Array.isArray(currentForm.signatures) || currentForm.signatures.length === 0) {
+    currentForm.signatures = defaultSignatures();
+  }
+  // Migrate spare parts (newer field, may be missing on old saved forms)
+  if (!Array.isArray(currentForm.spare_parts) || currentForm.spare_parts.length === 0) {
+    currentForm.spare_parts = [makeEmptySparePartRow()];
+  }
+  if (typeof currentForm.include_spare_parts !== 'boolean') {
+    currentForm.include_spare_parts = false;
+  }
+  document.getElementById('includeSpareParts').checked = currentForm.include_spare_parts;
+  document.getElementById('sparePartsBlock').style.display = currentForm.include_spare_parts ? 'block' : 'none';
   if (currentForm.company) setCompany(currentForm.company);
   renderItems();
+  renderSpareParts();
   renderReasons();
   renderSignatures();
 }
@@ -24172,20 +24423,18 @@ function renderSignatures() {
   const c = document.getElementById('signaturesContainer');
   c.innerHTML = '';
   currentForm.signatures.forEach((sig, idx) => {
-    const isCore = idx < 4; // First 4 are core slots, the rest are added/removable
     const row = document.createElement('div');
     row.className = 'sig-row';
     row.innerHTML = `
       <div class="field">
         <label>Role / Title</label>
-        <input value="${escapeHtml(sig.title)}" data-sig-field="title" data-idx="${idx}"
-               ${isCore ? 'data-locked="1"' : ''}>
+        <input value="${escapeHtml(sig.title)}" data-sig-field="title" data-idx="${idx}">
       </div>
       <div class="field">
         <label>Name</label>
         <input value="${escapeHtml(sig.name)}" data-sig-field="name" data-idx="${idx}">
       </div>
-      ${!isCore ? `<button class="row-remove" onclick="removeSignatureRow(${idx})" title="Remove">×</button>` : '<div></div>'}
+      <button class="row-remove" onclick="removeSignatureRow(${idx})" title="Remove">×</button>
     `;
     c.appendChild(row);
   });
@@ -24202,7 +24451,7 @@ function addSignatureRow() {
   renderSignatures();
 }
 function removeSignatureRow(idx) {
-  if (idx < 4) return; // Don't allow removing core slots
+  if (currentForm.signatures.length <= 1) return;
   currentForm.signatures.splice(idx, 1);
   renderSignatures();
 }
@@ -24300,9 +24549,9 @@ document.addEventListener('click', () => closeSettingsMenu());
 function exportAllData() {
   closeSettingsMenu();
   const data = {
-    version: 1,
+    version: 2,
     exported_at: new Date().toISOString(),
-    customItems, counters, history,
+    customItems, customSpareParts, counters, history,
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -24323,8 +24572,9 @@ function importData() {
     try {
       const txt = await f.text();
       const data = JSON.parse(txt);
-      if (!confirm(`Import ${(data.history || []).length} forms, ${(data.customItems || []).length} custom items, and counters?\nThis will merge with current data.`)) return;
-      customItems = [...customItems, ...(data.customItems || []).filter(it => !customItems.find(x => x.c === it.c))];
+      if (!confirm(`Import ${(data.history || []).length} forms, ${(data.customItems || []).length} custom items, ${(data.customSpareParts || []).length} spare parts, and counters?\nThis will merge with current data.`)) return;
+      customItems      = [...customItems,      ...(data.customItems      || []).filter(it => !customItems.find(x => x.c === it.c))];
+      customSpareParts = [...customSpareParts, ...(data.customSpareParts || []).filter(it => !customSpareParts.find(x => x.c === it.c))];
       counters = { ...counters, ...(data.counters || {}) };
       const existingRefs = new Set(history.map(h => h.ref_no));
       history = [...(data.history || []).filter(h => !existingRefs.has(h.ref_no)), ...history];
@@ -24483,8 +24733,51 @@ async function generatePdfBytes() {
   // If running low, page break
   if (y < 320) { page = newPage(); y = 670; }
 
-  // Section 3: Method codes
-  sectionTitle('3. Disposal Method Codes');
+  // Section 3: Spare Parts Removed (only if enabled and at least one filled row)
+  const filledSpareParts = (form.spare_parts || []).filter(s =>
+    s && (s.description || s.part_code || s.qty || s.condition || s.notes)
+  );
+  if (form.include_spare_parts && filledSpareParts.length > 0) {
+    if (y < 220) { page = newPage(); y = 670; }
+    sectionTitle('3. Spare Parts Removed (from disposed machines)');
+    const spHeaders = ['#', 'Spare Part Description', 'Part Code', 'Qty', 'Condition', 'Notes'];
+    const spWidths  = [22, 175, 90, 35, 70, 103];
+    page.drawRectangle({ x: ML, y: y - 4, width: CW, height: 16, color: rgb(0.93, 0.95, 0.99) });
+    let scx = ML;
+    spHeaders.forEach((h, i) => {
+      drawText(h, scx + 3, y, 8, bold, rgb(0.1, 0.3, 0.6));
+      scx += spWidths[i];
+    });
+    y -= 16;
+    const spTableTop = y + 16;
+    const spRowH = 22;
+    const spRowsToDraw = Math.max(filledSpareParts.length, 3);
+    for (let i = 0; i < spRowsToDraw; i++) {
+      if (y - spRowH < 120) { page = newPage(); y = 670; sectionTitle('3. Spare Parts Removed (cont.)'); }
+      const sp = filledSpareParts[i] || { description: '', part_code: '', qty: '', condition: '', notes: '' };
+      page.drawLine({ start: { x: ML, y }, end: { x: A4_W - MR, y }, thickness: 0.3, color: rgb(0.8, 0.8, 0.8) });
+      scx = ML;
+      const vals = [String(i + 1), sp.description, sp.part_code, sp.qty, sp.condition, sp.notes];
+      vals.forEach((v, j) => {
+        const lines = wrap(v, font, 8.5, spWidths[j] - 6);
+        lines.slice(0, 2).forEach((ln, k) => drawText(ln, scx + 3, y - 10 - k * 9, 8.5, font));
+        scx += spWidths[j];
+      });
+      y -= spRowH;
+    }
+    page.drawLine({ start: { x: ML, y }, end: { x: A4_W - MR, y }, thickness: 0.3, color: rgb(0.8, 0.8, 0.8) });
+    scx = ML;
+    for (let j = 0; j <= spWidths.length; j++) {
+      page.drawLine({ start: { x: scx, y }, end: { x: scx, y: spTableTop }, thickness: 0.3, color: rgb(0.8, 0.8, 0.8) });
+      scx += spWidths[j] || 0;
+    }
+    y -= 16;
+    if (y < 300) { page = newPage(); y = 670; }
+  }
+
+  // Section: Method codes legend (renumbered to 4 when spare parts present)
+  const methodNum = (form.include_spare_parts && filledSpareParts.length > 0) ? '4' : '3';
+  sectionTitle(methodNum + '. Disposal Method Codes');
   const mc = CW / 3;
   for (let i = 0; i < DISPOSAL_METHODS.length; i += 3) {
     let mx = ML;
@@ -24500,8 +24793,9 @@ async function generatePdfBytes() {
   }
   y -= 8;
 
-  // Section 4: Reasons
-  sectionTitle('4. Reason for Disposal');
+  // Section: Reasons (renumbered when spare parts present)
+  const reasonsNum = (form.include_spare_parts && filledSpareParts.length > 0) ? '5' : '4';
+  sectionTitle(reasonsNum + '. Reason for Disposal');
   const rc = CW / 2;
   for (let i = 0; i < REASONS.length; i += 2) {
     let rx = ML;
@@ -24522,21 +24816,23 @@ async function generatePdfBytes() {
   }
   y -= 4;
 
-  // Section 5: Notes
-  sectionTitle('5. Notes / Additional Information');
+  // Section: Notes (renumbered when spare parts present)
+  const notesNum = (form.include_spare_parts && filledSpareParts.length > 0) ? '6' : '5';
+  sectionTitle(notesNum + '. Notes / Additional Information');
   page.drawRectangle({ x: ML, y: y - 50, width: CW, height: 55, borderColor: rgb(0.7, 0.7, 0.7), borderWidth: 0.5 });
   const nl = wrap(form.notes || '', font, 9, CW - 12);
   nl.slice(0, 4).forEach((ln, k) => drawText(ln, ML + 6, y - 8 - k * 12, 9, font));
   y -= 64;
 
-  // Section 6: Signatures
+  // Section: Signatures (renumbered when spare parts present)
   if (y < 200) { page = newPage(); y = 670; }
-  sectionTitle('6. Approvals & Signatures');
+  const sigNum = (form.include_spare_parts && filledSpareParts.length > 0) ? '7' : '6';
+  sectionTitle(sigNum + '. Approvals & Signatures');
   const sigs = (form.signatures || []).map(s => [s.title || '', s.name || '']);
   const sw = CW / 2, sh = 60;
   for (let i = 0; i < sigs.length; i += 2) {
     // Check space; if not enough, start new page
-    if (y - sh < 120) { page = newPage(); y = 670; sectionTitle('6. Approvals & Signatures (cont.)'); }
+    if (y - sh < 120) { page = newPage(); y = 670; sectionTitle(sigNum + '. Approvals & Signatures (cont.)'); }
     let sx = ML;
     for (let j = 0; j < 2; j++) {
       const b = sigs[i + j];
@@ -24674,6 +24970,34 @@ async function generateDocxBlob() {
     methodRows.push(new D.TableRow({ children: cells }));
   }
 
+  // Spare parts table (only if section enabled & some row has content)
+  const filledSpareParts = (form.spare_parts || []).filter(s =>
+    s && (s.description || s.part_code || s.qty || s.condition || s.notes)
+  );
+  const showSpareParts = !!form.include_spare_parts && filledSpareParts.length > 0;
+  const spareHeaderRow = new D.TableRow({
+    tableHeader: true,
+    children: ['#','Spare Part Description','Part Code','Qty','Condition','Notes'].map(h =>
+      new D.TableCell({
+        shading: { fill: 'E8F0FA' },
+        children: [new D.Paragraph({ children: [new D.TextRun({ text: h, bold: true, color: '1A4D8C', size: 16 })] })],
+      })
+    ),
+  });
+  const spareRows = filledSpareParts.map((sp, i) =>
+    new D.TableRow({
+      children: [String(i+1), sp.description||' ', sp.part_code||' ', sp.qty||' ', sp.condition||' ', sp.notes||' '].map(v =>
+        new D.TableCell({ children: [new D.Paragraph({ children: [new D.TextRun({ text: v, size: 18 })] })] })
+      ),
+    })
+  );
+
+  // Dynamic section numbers based on whether spare parts section is shown
+  const N_METHODS  = showSpareParts ? '4' : '3';
+  const N_REASONS  = showSpareParts ? '5' : '4';
+  const N_NOTES    = showSpareParts ? '6' : '5';
+  const N_SIGS     = showSpareParts ? '7' : '6';
+
   function reasonLine(checked, text) {
     return new D.Paragraph({
       children: [
@@ -24725,12 +25049,17 @@ async function generateDocxBlob() {
     new D.Paragraph({ children: [new D.TextRun({ text: '2. Items for Disposal', bold: true, color: COL_BLUE, size: 22 })], spacing: { before: 240, after: 80 } }),
     new D.Paragraph({ children: [new D.TextRun({ text: 'List each item separately. Use the disposal method codes from Section 3.', italics: true, color: COL_GREY, size: 18 })], spacing: { after: 100 } }),
     new D.Table({ width: { size: 100, type: D.WidthType.PERCENTAGE }, rows: [headerRow, ...itemRows] }),
-    new D.Paragraph({ children: [new D.TextRun({ text: '3. Disposal Method Codes', bold: true, color: COL_BLUE, size: 22 })], spacing: { before: 240, after: 100 } }),
+    ...(showSpareParts ? [
+      new D.Paragraph({ children: [new D.TextRun({ text: '3. Spare Parts Removed (from disposed machines)', bold: true, color: COL_BLUE, size: 22 })], spacing: { before: 240, after: 80 } }),
+      new D.Paragraph({ children: [new D.TextRun({ text: 'Parts salvaged from machines being disposed of.', italics: true, color: COL_GREY, size: 18 })], spacing: { after: 100 } }),
+      new D.Table({ width: { size: 100, type: D.WidthType.PERCENTAGE }, rows: [spareHeaderRow, ...spareRows] }),
+    ] : []),
+    new D.Paragraph({ children: [new D.TextRun({ text: N_METHODS + '. Disposal Method Codes', bold: true, color: COL_BLUE, size: 22 })], spacing: { before: 240, after: 100 } }),
     new D.Table({ width: { size: 100, type: D.WidthType.PERCENTAGE }, rows: methodRows }),
-    new D.Paragraph({ children: [new D.TextRun({ text: '4. Reason for Disposal', bold: true, color: COL_BLUE, size: 22 })], spacing: { before: 240, after: 100 } }),
+    new D.Paragraph({ children: [new D.TextRun({ text: N_REASONS + '. Reason for Disposal', bold: true, color: COL_BLUE, size: 22 })], spacing: { before: 240, after: 100 } }),
     new D.Paragraph({ children: [new D.TextRun({ text: 'Tick all that apply:', italics: true, color: COL_GREY, size: 18 })], spacing: { after: 80 } }),
     ...REASONS.map(([k, label]) => reasonLine(form.reasons[k], k === 'other' && form.other_text ? `Other: ${form.other_text}` : label)),
-    new D.Paragraph({ children: [new D.TextRun({ text: '5. Notes / Additional Information', bold: true, color: COL_BLUE, size: 22 })], spacing: { before: 240, after: 100 } }),
+    new D.Paragraph({ children: [new D.TextRun({ text: N_NOTES + '. Notes / Additional Information', bold: true, color: COL_BLUE, size: 22 })], spacing: { before: 240, after: 100 } }),
     new D.Paragraph({
       children: [new D.TextRun({ text: form.notes || ' ', size: 20 })],
       border: {
@@ -24741,7 +25070,7 @@ async function generateDocxBlob() {
       },
       spacing: { after: 240 },
     }),
-    new D.Paragraph({ children: [new D.TextRun({ text: '6. Approvals & Signatures', bold: true, color: COL_BLUE, size: 22 })], spacing: { before: 120, after: 120 } }),
+    new D.Paragraph({ children: [new D.TextRun({ text: N_SIGS + '. Approvals & Signatures', bold: true, color: COL_BLUE, size: 22 })], spacing: { before: 120, after: 120 } }),
     new D.Table({
       width: { size: 100, type: D.WidthType.PERCENTAGE },
       rows: (function() {
@@ -24863,8 +25192,9 @@ window.addEventListener('DOMContentLoaded', () => {
   const savedTab = localStorage.getItem('activeTab');
   if (savedTab === 'labels') switchTab('labels');
 
-  // Wire up search input
+  // Wire up search inputs
   document.getElementById('searchInput').addEventListener('input', e => renderSearchResults(e.target.value));
+  document.getElementById('sparePartSearchInput').addEventListener('input', e => renderSparePartSearchResults(e.target.value));
 
   // Close modals on overlay click and Escape
   document.querySelectorAll('.modal-overlay').forEach(o => {
